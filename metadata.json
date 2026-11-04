@@ -1,0 +1,7 @@
+{
+  "name": "Attendora - Academic Attendance & Compliance System",
+  "description": "Multi-tenant cloud-based student attendance management, real-time compliance tracking, digital roll-call, and statutory reporting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

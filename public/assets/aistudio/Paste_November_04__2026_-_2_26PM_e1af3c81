@@ -1,0 +1,854 @@
+ENTERPRISE PRODUCT SPECIFICATION ATTENDORA — PRODUCT REQUIREMENTS DOCUMENT Multi-Tenant Cloud-Based Student Attendance Management & Compliance System Document ID: ATD-PRD V1.0 Status: Approved for Baseline Security: Institutional Confidential 1. DOCUMENT CONTROL & STAKEHOLDERS This Product Requirements Document (PRD) defines the absolute product baseline, technical surface, functional mechanics, acceptance bounds, and release boundaries for Attendora. It serves as the single source of truth for Product, Engineering, Quality Assurance, UI/UX, and Executive Stakeholders. 1.1 Document Metadata Attribute Specification Details Product Name Document Version Attendora (Cloud-Based Student Attendance Management System) 1.0.0 (Production Master) Document Owner Target Baseline Principal Product Lead (EdTech Platforms Group) Q3–Q4 Academic Institutional Onboarding Cycle Target Audience 1.2 Revision History Version v0.1.0 v0.5.0 v1.0.0 Date 12 Oct 2026 24 Oct 2026 04 Nov 2026 Core Engineering (Backend, Web Frontend), QA Automation, UX Design, Academic Operations, Department Heads Author Lead PM / Founders Staff Product Manager Enterprise PRD Review 1.3 Stakeholders & Governance Sign-Off Role Lead Product Manager Technical Architect Responsibility Feature definition, roadmaps, scope boundaries, acceptance approval Flask application design, Firebase rules, deployment infra & scalability Summary of Changes Initial product draft outlining core problem statement and technology feasibility. Added comprehensive RBAC matrices, database entity schemas, and edge case specifications. Approved baseline specifications, fully defined acceptance criteria, edge condition rules, and NFRs. Sign-Off Authority Product Operations Lead Engineering VP / Tech Lead Status Approved Approved Attendora Product Requirements Document (PRD) — Confidential Page 1 of 21 Role Responsibility Sign-Off Authority Status Lead UI/UX Designer User interaction flows, responsive layout specs, error states Design Principal Approved Quality Assurance Lead End-to-end test harnesses, edge condition verifications, regressions Director of Quality Engineering Approved Institutional Operations Academic compliance, timetable compatibility, faculty onboarding Academic Dean Advisory Group Approved PRIORITY CLASSIFICATION FRAMEWORK All requirements inside Section 9 are strictly cataloged using standard priority tokens: P0 (Critical / Blocker): Core baseline mandatory for MVP deployment. The system cannot go live without 100% test coverage and zero outstanding severity-1 bugs. P1 (High Priority / Fast Follow): Vital operational enhancements scheduled immediately following initial user pilot stabilization. P2 (Desirable / Future Phase): Advanced automations, third-party SIS integrations, and biometrics reserved for v2.0+ roadmap milestones. 2. INTRODUCTION & PRODUCT VISION 2.1 Purpose & Execution Intent Paper registers, fragmented desktop spreadsheets, and legacy offline software cripple academic institutions with manual tally errors, proxy attendance, and unacceptably delayed low-attendance interventions. Attendora provides an authoritative, browser-based, multi-tenant digital attendance infrastructure that enables faculty to record lecture records in seconds, grants students immediate visibility into their attendance thresholds, and equips institutional administrators with real-time statutory compliance reporting. 2.2 Product Vision Statement "To establish the most frictionless, transparent, and dependable attendance tracking ecosystem for higher education institutions—eradicating administrative friction, safeguarding academic compliance, and providing instantaneous actionable insights to students and faculty." 2.3 Executive Product Summary Attendora is an enterprise-ready, cloud-native Software as a Service (SaaS) web application built with a responsive Bootstrap frontend, Python Flask RESTful backend, and real-time cloud data store, engineered to replace manual roll-call ledgers with secure, instant, and auditable digital attendance lifecycles. 2.4 Product Boundary & Scope Definition This document governs the end-to-end functional criteria, data definitions, security constraints, and operational boundaries of the Attendora web system. The boundaries are specified as follows: Attendora Product Requirements Document (PRD) — Confidential Page 2 of 21 In-Scope Boundaries: Web application workflows for Students, Faculty/Teachers, and Administrators; institutional multi-department hierarchy; manual digital roll-call and bulk-mark mechanics; student self service percentage tracking; statutory low-attendance alerts (75% regulatory limit); Excel/CSV and PDF institutional report generation; role-based access control and secure authentication. Out-of-Scope (Excluded from Current Baseline): Direct biometric/RFID hardware sensor firmware integration; automatic native payment gateway processing for student fines; complete learning management systems (LMS) assignments/grades; physical room door-lock automation. 3. PROBLEM STATEMENT & MARKET CONTEXT 3.1 Problem Statement by User Persona For Faculty & Lecturers: Taking roll-call on paper ledgers consumes 10–15 minutes of every 60-minute instructional session. Tallying physical attendance sheets at the end of the term requires 40+ hours of tedious calculation, producing severe transcription and calculation errors. For Students: Students lack continuous visibility into their cumulative and subject-level attendance. They only discover they have breached mandatory minimum compliance thresholds (typically 75% under university standards) when debarred right before final semester examinations, preventing corrective intervention. For Academic Administrators & Deans: Department heads have zero real-time visibility into lecture conduction status or daily absenteeism patterns. Compiling institutional reports for regulatory accreditations requires weeks of manual data aggregation across dozens of physical binders. 3.2 Current Alternatives & Institutional Baselines Alternative Mechanism & Operational Reality Physical Roll-Call Registers Spreadsheets (Excel / Sheets) Paper ledgers manually checked by faculty per class period and submitted to departmental offices monthly. Faculty maintain individual offline Excel workbooks uploaded to shared network drives or emails. Systemic Deficiencies Vulnerable to physical loss, page destruction, proxy marking, unsearchable records, and no student visibility. Formula corruption, severe version divergence, unauthenticated overwrites, and fragmented student records. Monolithic ERP Systems Legacy, on-premise client-server suites installed on local college intranet computers. 3.3 Pain Points & Economic Costs Exorbitant licensing costs, rigid configurations, non-responsive mobile views, and frequent downtime. Direct Productivity Waste: An institution with 80 faculty members conducting 4 lectures daily loses approximately 53 faculty hours per day strictly performing physical roll-calls. Statutory & Legal Exposure: Inaccurate attendance calculation leads to wrongful student debarment disputes, parental appeals, and accreditation compliance sanctions from higher education bodies. Data Latency: Traditional attendance consolidation runs on a 30-day billing or monthly cycle, rendering timely behavioral or academic intervention impossible. Attendora Product Requirements Document (PRD) — Confidential Page 3 of 21 3.4 Why Now Educational institutions in India and global emerging markets are executing rapid digital transformations. With ubiquitous 4G/5G mobile connectivity across campuses and faculty using personal smartphones and laptops in classrooms, a cloud-first, mobile-responsive web application eliminates the capital expense barrier of expensive dedicated scanning hardware. 3.5 Competitive Landscape & Differentiation Matrix Dimension Legacy ERPs Biometric / RFID Vendors Attendora SaaS Deployment Speed 3–6 Months (Complex server setups) 4–8 Weeks (Hardware wiring/cabling) Instant Self-Serve / < 24 Hours Hardware Investment High local server costs Expensive sensor units per doorway Zero Hardware (BYOD Web) Ease of Use Cluttered, 90s-style legacy UIs Firmware dependencies, card losses Clean, 3-click Responsive UI Student Access Rarely exposed outside campus LAN Terminal screen or physical kiosk 24/7 Cloud Access on any device 4. GOALS, OBJECTIVES & NON-GOALS 4.1 Business Goals Goal ID Strategic Business Goal Measurable Target Timeframe BG-01 Establish initial institutional customer foothold 15 Higher Education Colleges onboarded First 6 Months post launch BG-02 Achieve sustained operational engagement > 90% Faculty Monthly Active Usage Month 3 onwards per college BG-03 SaaS Subscription Conversion (Freemium to Paid) 25% Tier-1 institutional pilot conversion Month 9 post-pilot BG-04 Low System Churn Rate < 5% annual institutional contract churn Annual renewal cycle 4.2 Product Goals Radical Roll-Call Acceleration: Reduce the time required for a faculty member to mark attendance for a 60 student class from 12 minutes to under 45 seconds. Complete Information Transparency: Ensure 100% of enrolled students have real-time visibility into their overall and subject-level attendance percentages within 2 seconds of faculty submission. Instant Institutional Auditing: Allow Academic Administrators to generate verified, printable compliance reports across any department, semester, or section in less than 5 clicks. Attendora Product Requirements Document (PRD) — Confidential Page 4 of 21 4.3 Explicit Non-Goals (Scope Fence) No Automated Biometric Hardware Control: The system will not directly communicate with physical biometric USB devices, fingerprint scanners, or RFID card readers in Version 1.0. No Examination Grading or LMS Workflow: Attendora will not manage assignments, grades, exam transcripts, or course video streaming; it is strictly an attendance and compliance engine. No Financial Fee Collection: Attendora will calculate attendance-shortage fines where applicable, but will not act as a credit card payment gateway or merchant account processor for student fees in MVP. 5. SUCCESS METRICS & KPIS 5.1 North Star Metric NORTH STAR METRIC: VERIFIED RECORDED STUDENT-LECTURES (VRSL) Definition: The total number of unique student-lecture sessions successfully recorded, validated, and finalized into the database per academic day. Strategic Justification: This metric captures core customer value across all three personas: faculty actively using the system, students receiving tracking entries, and institutions establishing regulatory audit trails. 5.2 Primary KPIs (AARRR Framework Aligned) Lifecycle Stage Key Performance Indicator Operational Definition Target Objective Acquisition Institution Roster Completion % of invited colleges uploading full student and faculty rosters within 7 days. > 80% onboarding completion Activation First-Lecture Execution Rate % of onboarded faculty who successfully mark their first digital lecture within 48h. > 85% activation Retention Weekly Active Faculty (WAF) Faculty logging in and submitting ≥ 4 lecture attendance rosters per week. > 92% sustained retention Engagement Student Portal Session Rate Average monthly logins per enrolled student reviewing status. > 4.0 sessions/month/student Quality / SLA Submission Error Rate Percentage of attendance submission API requests resulting in HTTP 5xx errors. < 0.05% of all submissions 5.3 Guardrail Metrics The engineering and product teams must track these metrics to ensure rapid product iteration does not degrade product integrity: Attendora Product Requirements Document (PRD) — Confidential Page 5 of 21 Data Revision Dispute Rate: Must remain below 0.2% of total attendance marks logged (ensures teacher accuracy and low tampering). Critical Path API Latency: 95th percentile latency for roll-call submission must stay < 500ms on standard 3G/4G connections. System Availability: Core service uptime must maintain a strict 99.9% availability during institutional operating hours (07:00 to 20:00 IST). 6. TARGET USERS & PERSONAS Persona 1: Prof. Rajesh Deshmukh — Assistant Professor (Faculty Member) PRIMARY OPERATIONAL USER Context & Environment: 42 years old, teaching Computer Science at an engineering college in Pune. Conducts 3 lectures and 2 practical lab sessions daily across different classrooms. Uses a mid-range Android smartphone and an institutional Windows laptop. Core Objectives: Complete lecture attendance within 60 seconds without disrupting classroom momentum; maintain error-free records; quickly identify chronically absent students before midterm exams. Frustrations: Spends up to 15 minutes manually calling names from paper registers; dealing with proxy roll calls; spending entire weekends manually tallying monthly percentages for departmental office submissions. Device Context: Mobile Chrome browser on Android inside classrooms over campus Wi-Fi / 4G cellular; desktop browser in faculty cabin. Persona 2: Sneha Kulkarni — 3rd Year B.Tech Student (Student) CONSUMER USER Context & Environment: 20 years old, balancing heavy academic coursework, project assignments, and campus placements. Uses an iPhone / Android smartphone constantly on the move. Core Objectives: Always know exact real-time attendance percentage across all theory subjects; receive immediate alerts when approaching the dangerous 75% boundary; verify absence records to detect errors. Frustrations: Finding out only a week before semester exams that an unexpected absence resulted in debarment; having no proof when a teacher marked them absent by mistake. Device Context: 95% mobile web browser access via personal smartphone. Persona 3: Dr. Anita Roy — Academic Dean & Department Administrator (Admin) ADMINISTRATIVE & GOVERNANCE USER Context & Environment: 54 years old, responsible for academic compliance, regulatory university audits, faculty oversight, and parental escalations for an institute of 2,400 students. Core Objectives: Instantly view institution-wide attendance health; export verified compliance rosters for University / Accreditation inspections; enforce accountability among teaching staff. Attendora Product Requirements Document (PRD) — Confidential Page 6 of 21 Frustrations: Missing, illegible, or modified paper logs; delays in receiving departmental registers; handling angry parents whose children were debarred without documented advance notice. Device Context: Desktop workstation (Windows/macOS), high-resolution widescreen display. 7. USER STORIES & JOBS TO BE DONE (JTBD) 7.1 Jobs to Be Done (JTBD) Framework Faculty JTBD: "When I step into the lecture hall, I want to quickly capture student presence with minimal clicks, so that I can maximize actual teaching time and avoid manual administrative calculation work." Student JTBD: "When I am planning my academic schedule, I want to see my real-time verified attendance percentage per subject, so that I can remain compliant with institutional requirements and avoid sudden debarment." Administrator JTBD: "When regulatory inspections or audit cycles occur, I want to generate authoritative, auditable attendance reports across all departments, so that I can guarantee statutory compliance without staff overhead." 7.2 User Stories by User Type User Role Capability Desire User Story Statement Core Value Faculty Default Present Bulk Mark As a teacher, I want all students to be marked 'Present' by default so that I only need to tap the names of the few absent students. Speed & Efficiency Faculty Session Editing Window As a teacher, I want to correct an accidental attendance entry within a restricted time window so that my records stay strictly accurate. Error Correction Student Deficit Margin Calculator As a student, I want to see how many future consecutive lectures I must attend to recover above 75% so that I can take corrective action. Actionable Guidance Student Detailed Date Log As a student, I want to inspect the exact calendar dates and time slots when I was marked absent so that I can contest errors immediately. Transparency Admin Bulk Roster Ingestion As an admin, I want to upload CSV files of students and faculty so that I can set up an entire department in minutes without manual data entry. Rapid Onboarding Admin Low-Attendance Defaulters List As an admin, I want to filter and export all students with < 75% attendance across any semester so that formal warning notices can be issued. Compliance & Control Attendora Product Requirements Document (PRD) — Confidential Page 7 of 21 8. SCOPE, ASSUMPTIONS, CONSTRAINTS & DEPENDENCIES 8.1 Scope Boundaries Mandatory In-Scope: Multi-role authentication (Student, Faculty, Admin); responsive mobile-first digital roll call sheet; real-time attendance calculation engine; threshold breach flagging (75% default); printable and downloadable PDF/Excel consolidated summaries; department, class, and subject configuration consoles. Explicitly Out of Scope: Automated GPS-geofenced student self-check-in; facial recognition video feed inference; fee management payment gateways; multi-school district hierarchical payroll processing. 8.2 Documented Assumptions Assumption ID Statement of Operational Assumption Risk / Impact if Invalid ASM-01 Institutions possess reliable Wi-Fi or cellular data (3G/4G/5G) across lecture halls. Offline roll-call local caching would be required immediately rather than in Phase 2. ASM-02 Colleges enforce a standard 75% minimum attendance rule based on state university mandates. System must support configurable institutional thresholds at the admin settings tier. ASM-03 Faculty members possess personal smartphones or laptops in classrooms (BYOD model). Low adoption if college must supply dedicated hardware terminals to staff. 8.3 Project Constraints Technical Constraints: Application backend built in Python Flask; client interface styled with lightweight Bootstrap without heavy node-based SPA frameworks to maximize compatibility with low-end mobile devices; data storage managed on cloud infrastructure (Firebase / PostgreSQL on Render/AWS). Resource & Budget Constraints: Initial architecture calibrated for minimal hosting overhead, requiring database queries and bandwidth to fit within high-efficiency parameters. Regulatory & Privacy Constraints: Compliance with Indian Digital Personal Data Protection (DPDP) Act; student contact numbers and records must be protected behind strict institutional tenant barriers. 8.4 System Dependencies Dependency Entity Type Description Impact if Delayed Cloud Database (Firebase/Firestore) Infrastructure Persistent cloud document/relational store for real-time reads and writes. System blocked; no state persistence. Deployment Host (Render / AWS) PaaS / Cloud Containerized Python WSGI runtime for web application delivery. Inability to serve production endpoints. Institutional CSV Datasets Customer Asset Standardized student roll number, email, and class rosters provided by colleges. Delayed institutional onboarding. Attendora Product Requirements Document (PRD) — Confidential Page 8 of 21 9. FUNCTIONAL REQUIREMENTS The following tables specify the mandatory capabilities of the Attendora system. Each requirement is assigned a deterministic ID, strict priority, and independently verifiable acceptance criteria. 9.1 Module: Authentication, Identity & Session Management (AUTH) Req ID Feature Description Priority Testable Acceptance Criteria FR-AUTH-01 Multi-Role Secure Login P0 1. System provides email/username and password entry fields. 2. Upon valid credential submission, user is authenticated and redirected to role-specific dashboard (Student, Faculty, Admin) within 1.5s. 3. Invalid credentials trigger inline error: "Invalid username or password" without revealing account existence. 4. Rate limits to max 5 failed attempts per IP per 10 minutes before locking out for 15 minutes. FR-AUTH-02 Role-Based Access Control (RBAC) Enforcement P0 1. Unauthenticated users accessing any internal route are redirected to /login with 302 code. 2. Students attempting to access /faculty/* or /admin/* routes receive HTTP 403 Forbidden with zero data leaked. 3. Faculty attempting to access /admin/* receive HTTP 403 Forbidden. 4. User session state is validated on every server transaction. FR-AUTH-03 Session Expiry & Secure Logout P0 1. User sessions expire after 8 hours of inactivity. 2. Clicking "Log Out" invalidates the server-side session token immediately. 3. Browser back-navigation post-logout displays login screen and does not display cached private data. FR-AUTH-04 Password Reset Workflow P1 1. User enters registered email; system sends cryptographically random, single-use reset token valid for 30 minutes. 2. Token expires immediately upon successful password update. 3. Passwords must enforce minimum 8 characters with at least 1 number and 1 special symbol. Attendora Product Requirements Document (PRD) — Confidential Page 9 of 21 9.2 Module: Faculty Operations & Attendance Marking (FAC) Req ID Feature Description Priority Testable Acceptance Criteria FR-FAC-01 Lecture Session Creation P0 1. Faculty selects Department, Class/Semester, Section, and assigned Subject from dropdowns. 2. Date defaults to current calendar day; lecture time-slot defaults to current hour. 3. System validates that the faculty member is officially assigned to teach the selected subject. 4. Duplicate lecture prevention: If a lecture record exists for the exact same subject, section, date, and hour, system prompts confirmation: "A lecture already exists for this slot. Overwrite or create extra session?" FR-FAC-02 Interactive Digital Roll Call Sheet P0 1. System dynamically renders table containing all active enrolled students sorted by Roll Number. 2. Every student displays: Roll Number, Full Name, and a toggleable status badge. 3. "Mark All Present" default: All toggles initialize in "Present" state. 4. Single tap/click on student row flips state to "Absent" (highlighted in high-contrast red). 5. Persistent sticky footer displays dynamic count: "Total: X | Present: Y | Absent: Z" updated instantaneously on client side. FR-FAC-03 Attendance Submission & Finalization P0 1. Clicking "Submit Attendance" triggers modal summary showing counts. 2. Confirmation commits atomic batch write to cloud database. 3. System generates unique SessionID, timestamp, and audit trail of user ID. 4. Successful write redirects to confirmation view within 1.0s and shows success alert banner. FR-FAC-04 Attendance Modification Grace Period P0 1. Faculty can edit a submitted attendance sheet within a strict 24-hour window post-submission. 2. Any alteration after submission requires an explicit textual "Reason for Modification" entry (minimum 10 characters). 3. Modifying entries updates the student records and appends an immutable record to the Audit Log. 4. Post 24 hours, the record locks permanently for faculty and requires Admin elevation to modify. FR-FAC-05 Class-Level Attendance Summary View P1 1. Faculty can view monthly cumulative percentage grid for all students in their assigned subjects. 2. Rows with cumulative percentage < 75% are visually highlighted in light red. 3. Clicking any student expands the chronological history of all conducted lectures and presence status. Attendora Product Requirements Document (PRD) — Confidential Page 10 of 21 9.3 Module: Student Self-Service Dashboard (STU) Req ID Feature Description Priority Testable Acceptance Criteria FR-STU-01 Cumulative Attendance Overview P0 1. Student dashboard prominently displays overall institutional attendance percentage calculated via formula: (Total Classes Attended / Total Classes Conducted) * 100. 2. Displays total attended and total conducted counts. 3. Color coded: Green (≥ 75%), Amber (70.0%–74.9%), Red (< 70.0%). 4. Data updates immediately when a faculty member submits a new session. FR-STU-02 Subject-Wise Breakdown Cards P0 1. Lists all enrolled courses for the active semester. 2. Each card shows: Course Name, Course Code, Faculty Name, Classes Attended / Conducted, and Percentage rounded to 1 decimal place. 3. Includes status badge: "Safe", "At Risk", or "Critical Shortage". FR-STU-03 Shortage Recovery Calculator P1 1. For any subject where percentage is < 75%, system displays dynamic calculation: "You must attend next N consecutive classes to reach 75%." 2. Mathematical model: ceil((0.75 * Conducted Attended) / 0.25). 3. If percentage is ≥ 75%, displays: "You can afford to miss M upcoming classes while maintaining 75%." FR-STU-04 Date-Wise Historical Attendance Ledger P1 1. Interactive log listing all class sessions held for the student's section. 2. Filters by Date Range and by Subject. 3. Explicitly shows: Date, Time Slot, Subject, Faculty Name, Status (Present/Absent). 4. Includes "Dispute Status" button to generate formal error inquiry email to the faculty. 9.4 Module: Administrative Management & Institutional Reporting (ADM) Req ID Feature Description Priority Testable Acceptance Criteria FR-ADM-01 Batch Student & Faculty Onboarding (CSV) P0 1. Admin can upload .csv file containing: [RollNo, FullName, Email, Department, Year, Section]. 2. System performs pre-validation: flags missing headers, malformed email syntaxes, or duplicate roll numbers before writing. 3. Displays preview table with valid rows and flagged errors. 4. Commits valid records and generates default account credentials for batch users. FR-ADM-02 Academic Structure Configuration P0 1. Admin creates, edits, and disables: Departments, Academic Years, Semesters, Sections, and Subjects. 2. Maps Faculty to specific Subjects and Sections. 3. Prevents deletion of any subject or section that has active attendance records attached to preserve relational integrity. Attendora Product Requirements Document (PRD) — Confidential Page 11 of 21 Req ID Feature Description Priority Testable Acceptance Criteria FR-ADM-03 Defaulters / Low Attendance Report Generator P0 1. Admin selects Department, Semester, and customizable percentage threshold (default: 75%). 2. System queries all enrolled students and aggregates records across all subjects. 3. Outputs list of students falling below threshold, showing individual subject percentages and overall aggregate. 4. Supports one-click export to formatted Excel (.xlsx) and PDF document suitable for printing. FR-ADM-04 Attendance Record Override & Audit P1 1. Admin can override historical attendance records beyond the faculty 24-hour lock window (e.g., approved medical leave). 2. Form requires: Approver Name, Medical/Event Certificate Reference ID, and Justification note. 3. Original status, modified status, timestamp, and Admin ID logged irreversibly in Audit Log. FR-ADM-05 Institutional Analytical Dashboard P1 1. Dashboard shows institution-wide metric tiles: Total Lectures Scheduled Today, Total Lectures Marked, Overall Daily Attendance Rate (%). 2. Department-wise comparison bar table showing relative compliance. 3. List of missing roll-calls: highlights faculty members who had scheduled classes but have not submitted attendance. 9.5 Module: Alerts & Notification Engine (NOTIF) Req ID Feature Description Priority Testable Acceptance Criteria FR-NOTIF 01 Low-Attendance Dashboard Alerts P0 1. When a student's cumulative subject percentage drops below 75.0%, an persistent alert banner appears on their dashboard. 2. Banner states: "Warning: Your attendance in [Subject Name] has fallen to [X]%. Minimum requirement is 75%." 3. Banner cannot be dismissed until attendance recovers above threshold. FR-NOTIF 02 Missing Lecture Reminder for Faculty P1 1. If a timetable session ends and attendance has not been submitted within 60 minutes, system displays a prompt on faculty login. 2. Email reminder dispatched at 17:00 daily listing any unsubmitted classes for that day. 10. EDGE CASES & EXCEPTION HANDLING To guarantee system resilience in realistic educational environments (flaky campus Wi-Fi, accidental browser closes, late admissions), the system must handle exceptions predictably. Attendora Product Requirements Document (PRD) — Confidential Page 12 of 21 Failure Scenario Underlying Condition / Trigger Prescribed System Behavior & Recovery Mid-Roll-Call Network Drop Teacher marks 40 students; device loses internet connectivity before hitting "Submit". Client-side local storage retains toggled states. UI alerts: "Connection lost. Changes cached locally. Do not close tab." Auto-retries submission when connection restores. Concurrent Double Submission Teacher accidentally double-taps the "Confirm Submit" button rapidly on mobile. Client disables submit button immediately on first tap (idempotency key generated). Backend validates unique combination of (SubjectID + SectionID + Date + Slot); second request is rejected gracefully. Student Added Mid Semester A student joins class in week 6 after 20 lectures have already been conducted. Admin enrolls student with an "Enrollment Effective Date". Attendance calculation formula ignores lectures conducted prior to effective date; student is not penalized for prior sessions. Zero Lectures Conducted (Div/0) New semester starts; student or subject dashboard loaded before any attendance is logged. System detects Total Conducted == 0. Percentage displays "N/A" or "100.0% (No classes held)"; prevents division by-zero application crashes. Unauthorized Direct URL Probe Student attempts typing /admin/export-defaulters directly into browser bar. Backend auth middleware intercepts request, confirms absence of Admin claims, logs security warning event, and issues HTTP 403 redirect to /student/dashboard. Corrupt CSV Ingestion Admin uploads a CSV file containing 500 rows, but row 42 has a missing email and row 108 has an invalid character. Atomic transaction dry-run: System processes zero writes, displays validation error modal showing exact row numbers and issues ("Row 42: Email missing"), and prompts re-upload. 11. KEY USER FLOWS 11.1 Primary Faculty Roll-Call Flow (Happy Path & Correction) Step 1: Selection & Initialization Faculty navigates to /faculty/mark → Selects Class (e.g., TE-Computer), Section (A), and Subject (Database Management Systems) → Date auto-populates to Today → Clicks "Load Roster". Step 2: Interactive Marking System renders 60 enrolled students. All initialize to "Present" → Faculty calls roll or observes classroom → Taps rows for 4 absent students → Badges change to red "Absent" → Counters display 56 Present / 4 Absent. Step 3: Verification & Submission Faculty taps "Submit Attendance" → Confirmation popup summarizes figures → Faculty clicks "Confirm & Save" → API executes POST request → System commits record → Success banner displays with option to download immediate PDF summary. Attendora Product Requirements Document (PRD) — Confidential Page 13 of 21 Step 4: Post-Submission Correction (Within 24h) Student arrives late with official permission → Faculty opens "Recent Sessions" → Selects session → Changes student from "Absent" to "Present" → Enters reason: "Late arrival with Dean permission" → Clicks "Update Record" → Audit trail appends modification. 11.2 Student Attendance Verification Flow Step 1: Dashboard Login Student enters credentials at /login → Redirects to /student/dashboard. Step 2: Threshold Inspection Student reviews overall aggregate banner (e.g., 72.4% - Amber Warning) → Inspects subject card for "Data Structures" showing 68.0% (Critical Shortage). Step 3: Calculator Analysis & Date Drill-down Student views recovery recommendation: "Attend next 5 consecutive lectures to reach 75.0%" → Clicks "View Session History" to verify dates marked absent → Confirms legitimacy of records. 11.3 Admin Institutional Reporting Flow Step 1: Report Generation Admin enters /admin/reports → Selects Department: "Mechanical Engineering", Semester: "Sem 6", Threshold: "75%" → Clicks "Generate Compliance Report". Step 2: Inspection & Export System displays table of 22 flagged defaulters → Admin verifies details → Clicks "Export Formal PDF Report" → Browser downloads print-ready institutional document formatted with official university header. 12. NON-FUNCTIONAL REQUIREMENTS (NFRS) The system must comply with rigorous operational benchmarks to ensure high reliability in academic campus settings. NFR ID Category Requirement Specification Target Acceptance Metric NFR-PERF-01 Performance Class roster loading time for 100 students on mobile devices. < 800ms over 4G cellular connections. NFR-PERF-02 Performance Batch attendance write execution latency (commit to database). < 500ms p95 latency. NFR-SCAL-01 Scalability Concurrent faculty attendance submissions at hourly bell transitions. Supports 200 concurrent write operations without database contention. NFR-AVAL-01 Availability System uptime during institutional operating hours (07:00–20:00 IST). 99.9% Uptime (< 23 min unscheduled monthly downtime). NFR-SEC-01 Security Data in transit and data at rest encryption. HTTPS (TLS 1.3 enforced) and AES-256 cloud encryption. Attendora Product Requirements Document (PRD) — Confidential Page 14 of 21 NFR ID Category Requirement Specification NFR-SEC-02 NFR-RESP-01 Security Device Compatibility Credential hashing and storage. Target Acceptance Metric Argon2id or bcrypt (cost factor ≥ 12); no plaintext secrets. Responsive layout adaptability across screen viewports. NFR-BROW 01 NFR-ACC-01 Browser Support Accessibility Cross-browser client execution. Zero horizontal scrolling on viewports from 360px (mobile) to 2560px (4K). Chrome 90+, Edge 90+, Firefox 88+, Safari 14+ on Android, iOS, Windows, macOS. Visual contrast and accessibility standards. NFR-DATA-01 Data Protection Compliance with India DPDP Act and educational confidentiality. 13. INFORMATION ARCHITECTURE & KEY SCREENS 13.1 Site Structure & Navigation Hierarchy WCAG 2.1 Level AA compliance (minimum 4.5:1 text contrast). Tenant data isolation; student personal records cannot leak across institutions. Public Surface: / (Landing Page) → /login (Unified Portal Login) → /reset-password Student Surface: /student/dashboard (Overall percentage, quick stats, subject summary cards) /student/subjects/:id (Subject detailed session history, presence records) /student/calculator (Attendance recovery simulator) /student/profile (Account information, password change) Faculty Surface: /faculty/dashboard (Assigned classes, recent lectures, pending submissions) /faculty/mark (Active roll-call interactive sheet) /faculty/history (Past submitted sessions, 24h edit window) /faculty/reports (Class cumulative percentage matrix, defaulters view) Admin Surface: /admin/dashboard (Institutional macro-stats, missing lecture alerts) /admin/users (Students and Faculty directory, CSV bulk import) /admin/academics (Departments, Semesters, Sections, Subject mappings) /admin/reports (Defaulters list generator, PDF/Excel export) /admin/audit-logs (Immutable history of all system edits and overrides) Attendora Product Requirements Document (PRD) — Confidential Page 15 of 21 13.2 Key Screen Specifications Screen Name User Role Core Functional Purpose State Variants Handled Digital Roll-Call Console Faculty Primary attendance input interface with one-tap status toggling and live count bar. Loading, Populated Roster, Offline Cached, Submitting, Duplicate Warning, Success. Student Attendance Hub Student Visual dashboard presenting subject percentage badges, shortage warnings, and deficit calculator. Healthy (≥ 75%), At-Risk (70 74.9%), Debarred (< 70%), Empty (No lectures held). Institutional Defaulter Engine Admin Filtering matrix to identify non compliant students across departments for formal sanctions. Default 75% Filter, Custom % Filter, Zero Defaulters Found, Exporting File. Roster CSV Ingestion Tool Admin Upload interface for institution-wide bulk student/faculty provisioning. Drag-and-Drop, Parsing, Error Preview Grid, Importing Progress, Completed. 14. HIGH-LEVEL DATA MODEL & ENTITY RELATIONSHIPS The system utilizes a structured relational/document data model ensuring referential integrity across academic departments, classes, subjects, and attendance events. 14.1 Conceptual Entity Architecture CORE ENTITY RELATIONAL MAPPING Institution (1) → (N) Department (1) → (N) ClassSection ClassSection (1) → (N) StudentEnrollment (N) ← (1) User (Student) Subject (1) → (N) AttendanceSession (1) ← (1) User (Faculty) AttendanceSession (1) → (N) AttendanceRecord (N) ← (1) User (Student) AttendanceSession (1) → (N) AuditLog (Captures modifications) 14.2 Entity Catalog & Lifecycle Rules Entity Key Attributes Relational Ownership Lifecycle & Mutability Rules User UserID, Email, PasswordHash, Role, FullName, Status Owned by Institution. Created by Admin bulk import. Soft-deleted on graduation/departure. ClassSection SectionID, DepartmentID, YearLevel, Semester, SectionName Belongs to Department. Configured annually. Immutable once active attendance records are linked. Subject SubjectID, SubjectCode, SubjectName, DepartmentID, Semester Belongs to Department. Defined per curriculum. Cannot be dropped mid-term if records exist. Attendora Product Requirements Document (PRD) — Confidential Page 16 of 21 Entity Key Attributes Relational Ownership Lifecycle & Mutability Rules AttendanceSession SessionID, SubjectID, SectionID, FacultyID, Date, TimeSlot, Timestamp Created by Faculty. Created on roll-call. Modifiable by Faculty for 24h; locked thereafter. AttendanceRecord RecordID, SessionID, StudentID, Status (Present/Absent), ModifiedFlag Child of AttendanceSession. Written atomically during session creation. Updates append audit logs. AuditLog LogID, EntityType, EntityID, Action, ChangedBy, OldValue, NewValue, Timestamp, Reason System-wide governance. Strictly append-only. Zero deletion or update permissions permitted for any role. 15. ROLES & PERMISSIONS (RBAC MATRIX) The system enforces strict multi-tenant Role-Based Access Control. Permissions are evaluated on every server request. Resource / Capability Student Role Faculty Role Administrator Role Own Attendance Overview Read Only Read Only Read Only Class Attendance Ledgers No Access (403) Read (Assigned Classes) Read (All Department Classes) Create Attendance Session No Access (403) Create (Assigned Subjects) Create (Any Subject) Edit Session (< 24h) No Access (403) Update (Own Sessions with Reason) Update (Full Override) Edit Session (> 24h) No Access (403) No Access (Locked) Update (Mandatory Justification) Bulk Import Users (CSV) No Access (403) No Access (403) Full Create / Manage Export Compliance Reports No Access (403) Read / Export (Own Subjects) Full Read / Export (Institution-wide) View Audit Log Trail No Access (403) No Access (403) Read Only (Full Audit View) Attendora Product Requirements Document (PRD) — Confidential Page 17 of 21 16. INTEGRATIONS & THIRD-PARTY SERVICES Service / Technology Operational Purpose Criticality Degradation & Failure Fallback Firebase / Firestore Primary database engine for student identity, sessions, and records. Mission Critical If unavailable, web application returns HTTP 503 with polite "System undergoing database maintenance" message. Cloud Hosting (Render/AWS) Hosts containerized Python Flask WSGI application server. Mission Critical Auto-restarts failed worker processes. Health check endpoint at /healthz continuously probed. SMTP Email Service Dispatches password reset tokens and daily missing attendance reminders. Non-Critical Failure queued in background spooler; does not block core attendance marking workflows. Client Device Storage Browser local storage for session caching during intermittent Wi-Fi drops. High If disabled by private browsing, roll-call defaults to standard synchronous client server POST. 17. ANALYTICS & INSTRUMENTATION To evaluate user engagement, system health, and adoption bottlenecks, the application emits standardized telemetry events. Event Identifier Trigger Point Payload Properties Analytical Intent user_login_success Successful credential authentication. user_id, role, device_type Daily Active User (DAU) tracking. attendance_sheet_opened Faculty loads roll-call roster. faculty_id, subject_id, student_count Measures lecture initiation frequency. attendance_submitted Faculty clicks final submit confirmation. session_id, present_count, absent_count, duration_seconds Measures roll-call completion speed. attendance_session_edited Historical attendance modified. session_id, modified_by, hours_elapsed Monitors error rates and corrections. student_report_viewed Student views subject ledger. student_id, current_percentage Evaluates student self-service engagement. defaulter_report_exported Admin exports Excel/PDF list. admin_id, department, format Audits regulatory compliance generation. Attendora Product Requirements Document (PRD) — Confidential Page 18 of 21 18. AUDIT & OPERATIONAL LOGGING Educational compliance demands complete non-repudiation. Every modification to an attendance ledger after initial submission is irreversibly cataloged. AUDIT LOG IMMUTABILITY POLICY Audit records are strictly insert-only. No user role—including the Institutional Super Administrator—possesses the capability to delete, truncate, or alter audit log rows. Each row records: Timestamp (UTC), Actor ID, IP Address, Action Type, Target Record ID, Previous State, New State, Justification Text. Logged Action Responsible Actor Captured Data State Retention & Inspection Rule Attendance Modification Faculty or Admin Previous Status (e.g., Absent), New Status (Present), Justification Note. Retained for minimum 5 academic years for statutory audit. Account Role Change Super Admin Target User ID, Previous Role, Elevated Role. Permanent retention; immediate admin security alert. Bulk Data Deletion Super Admin Scope of records removed (e.g., archived graduating class). Permanent retention; requires dual-admin sign-off. 19. RELEASE PLAN & PHASED ROADMAP Phase Theme Core Scope Deliverables Milestone Exit Criteria Phase 0 Foundations & Architecture Flask core boilerplate, Firebase schema setup, authentication, RBAC middleware, Docker containerization. 100% passing unit tests on auth; automated deployment pipeline live. Phase 1 (MVP) Core Operational Loop Responsive roll-call UI, student self-service dashboards, batch CSV user ingestion, defaulters PDF export. Pilot deployment across 3 engineering colleges; > 1,000 lectures logged. Phase 2 Resilience & Engagement Offline roll-call caching (Service Worker), automated email notifications for defaulters, student recovery calculator. Zero attendance data lost during network drops; 90% faculty WAU. Phase 3 Enterprise Scale Multi-college SaaS tenant management, single sign-on (Google/Microsoft Workspace), dynamic timetable API integrations. SaaS subscription billing engine active; multi campus onboarding. 20. MINIMUM VIABLE PRODUCT (MVP) DEFINITION MVP LAUNCH GATE CRITERION "The Attendora MVP is complete when a faculty member can open the application on any mobile smartphone browser, mark and submit attendance for a 60-student class in under 60 seconds, have those records instantly compute student percentages, and enable college administrators to export a verified low-attendance defaulters report." Attendora Product Requirements Document (PRD) — Confidential Page 19 of 21 20.1 Feature Prioritization (MoSCoW Alignment) Must Have (P0 - MVP Gate): Secure RBAC login; interactive mobile roll-call with "Default Present"; real-time percentage calculator; student subject-wise view; CSV roster import; low-attendance filter (< 75%); PDF report export; 24h faculty modification grace period. Should Have (P1 - Fast Follow): Missing lecture alerts; deficit recovery calculator; date-range custom filtering; student dispute request button; institutional analytical overview dashboard. Could Have (P2 - Post-Pilot): Offline PWA capabilities; WhatsApp/SMS low-attendance notifications to parents; automated calendar timetable sync. Won't Have (Excluded): Biometric fingerprint hardware support; campus gate turnstile hardware integration; exam score and gradebook tracking. 21. RISKS & MITIGATIONS Risk Category Identified Risk Event Severity Engineered Mitigation Strategy User Adoption Faculty resist digital shift; find opening browser slower than paper. High Engineered "Default All Present" mechanism reduces roll-call to 4–5 screen taps total. In-person 15 minute training session for departmental faculty. Infrastructure Campus Wi-Fi connectivity blackouts inside basement classrooms. High Application designed with lightweight client-side payload (< 150KB); client local storage caches roll call until connectivity is regained. Data Integrity Faculty marks wrong lecture slot or records proxy for absent student. Medium Duplicate-slot warning prompts; 24-hour modification lock; complete audit trail captures any status modification with mandatory written reason. Security / Abuse Students attempt credential brute-forcing to alter records. Critical Role validation executed strictly on server backend; client input sanitized against SQLi/XSS; rate limits on login routes (5 attempts / 10 min). Cloud Cost Database read/write spikes exceed free tier thresholds rapidly. Medium Denormalized cumulative attendance aggregates stored on student records; eliminates need to query hundreds of individual raw session records per page load. 22. OPEN QUESTIONS & DECISION LOG # Open Architectural / Business Question Assigned Owner Resolution Date Current Working Assumption OQ-01 Should low-attendance warnings be dispatched via SMS/WhatsApp directly to parents? Product Lead / Dean Advisory Pre-Phase 2 Excluded from MVP due to third-party SMS gateway costs; dashboard alerts used initially. Attendora Product Requirements Document (PRD) — Confidential Page 20 of 21 # Open Architectural / Business Question Assigned Owner Resolution Date Current Working Assumption OQ-02 What is the exact institutional retention policy for graduating student records? Compliance / Legal Lead Phase 2 Launch Records archived to cold storage after 4 academic years; audit logs retained indefinitely. OQ-03 Should colleges be allowed to customize the defaulter threshold from 75% to other values (e.g., 80% for labs)? Engineering Lead Sprint 3 Yes; threshold stored as a configurable institutional settings variable (defaulting to 75.0%). 23. END-TO-END REQUIREMENT TRACEABILITY CHECK To verify absolute consistency across this specification, all core business goals map directly through to technical execution: Business Goal BG-02 (Faculty Retention) → Product Goal 1 (Under 45s roll-call) → User Story (Bulk Mark Present) → FR-FAC-02 → Verified by Acceptance Criteria → Prioritized as P0 → Release Phase 1 (MVP). Business Goal BG-01 (Institutional Onboarding) → Product Goal 3 (Instant Auditing) → User Story (Defaulters Export) → FR-ADM-03 → Verified by Acceptance Criteria → Prioritized as P0 → Release Phase 1 (MVP). Student Transparency Goal → Product Goal 2 (Real-time visibility) → User Story (Shortage Calculator) → FR-STU-03 → Verified by Acceptance Criteria → Prioritized as P1 → Release Phase 2. 24. GLOSSARY OF TERMS & ACRONYMS Term / Acronym Operational Definition in Attendora Context Roll-Call The formal academic procedure of verifying and registering the physical presence or absence of enrolled students during an instructional session. Defaulter A student whose cumulative attendance percentage falls below the mandatory statutory institutional threshold (standard benchmark: 75.0%). RBAC Role-Based Access Control: Security mechanism restricting system access permissions strictly to authorized roles (Student, Faculty, Administrator). VRSL Verified Recorded Student-Lectures: The core North Star metric measuring active system throughput and institutional value delivery. Idempotency An API characteristic ensuring that identical duplicate attendance submissions (e.g., from network lag or double-clicking) cause zero data duplication. BYOD Bring Your Own Device: Operating model where teachers use their own smartphones or laptops to access the web application without dedicated college hardware. Attendora Product Requirements Document (PRD) — Confidential Page 21 of 21 Key Highlights of the Generated Specification
+
+
+
+
+
+Structured Framework: Incorporates all 24 required standard PRD sections, ranging from Document Governance and North Star Metrics down to Traceability Matrices and Edge-Condition Handling.
+
+
+
+Measurable Acceptance Criteria: Functional requirements (e.g., FR-AUTH-01, FR-FAC-02, FR-ADM-03) feature testable criteria covering edge states, validation logic, boundary conditions, and error messages.
+
+
+
+Architectural Clarity: Establishes the technical foundation (HTML/Bootstrap, Python Flask, Cloud Database) while strictly isolating requirements, data lifecycles, and role-based permissions without implementation leakage.
+
+
+
+Print & Screen Optimized: Formatted with typography, high-contrast tables with sticky-style repeating headers, visual priority tags, and clean layout flow. 1. High-Level SaaS Architecture Diagram
+
+The high-level architecture separates public traffic, edge ingress, stateless application computing, asynchronous background pipelines, tenant/platform data stores, and external integrations.
+
+       ========================================================================================
+                                      USERS & CLIENT APPLICATIONS
+       ========================================================================================
+         [Students]           [Teachers / Faculty]      [College Admins]      [Platform Ops]
+              │                        │                        │                    │
+              ▼                        ▼                        ▼                    ▼
+       ┌──────────────┐         ┌──────────────┐         ┌──────────────┐    ┌──────────────┐
+       │ Student Web  │         │ Faculty Web  │         │  Admin Web   │    │ SuperAdmin   │
+       │ (Bootstrap/  │         │ (Bootstrap/  │         │ (Bootstrap/  │    │ Portal       │
+       │  Responsive) │         │  Responsive) │         │  Responsive) │    │ (Internal)   │
+       └──────┬───────┘         └──────┬───────┘         └──────┬───────┘    └──────┬───────┘
+              │                        │                        │                   │
+              └────────────────────────┼────────────────────────┴───────────────────┘
+                                       │ HTTPS (TLS 1.3)
+                                       ▼
+       ========================================================================================
+                                       EDGE & INGRESS SECURITY
+       ========================================================================================
+                                [Cloudflare Edge Network]
+                  DNS Anycast │ DDoS Mitigation │ WAF Rules │ SSL/TLS Termination
+                                       │
+                                       ▼ Static Assets (CSS/JS Bundles, Favicon)
+                                [Edge CDN Cache]
+                                       │
+                                       │ Dynamic API Calls (Host: api.attendora.com)
+                                       ▼
+                             [Reverse Proxy / Ingress]
+                       (NGINX / Cloud Load Balancer Gateway)
+                 • SSL Offloading & Strict HSTS
+                 • Tenant-Aware IP & Token Rate Limiting (Token Bucket)
+                 • Path Routing: /api/v1/platform/* vs /api/v1/tenant/*
+                                       │
+                                       ▼ HTTP/1.1 (Internal VPC Private Subnet)
+       ========================================================================================
+                                    API & APPLICATION LAYER
+       ========================================================================================
+                     ┌──────────────────────────────────────────────────┐
+                     │   Stateless Modular Monolith (Python Gunicorn)   │
+                     │          Auto-Scaled Application Pods            │
+                     └────────────────────────┬─────────────────────────┘
+                                              │
+                      ┌───────────────────────┴────────────────────────┐
+                      ▼                                                ▼
+         [Platform Filter Pipeline]                       [Tenant Context Interceptor]
+         • Platform JWT Verification                      • Tenant ID Extraction (Subdomain/Header)
+         • Platform Role Check (SuperAdmin)               • Cryptographic JWT Validation
+                                                          • RBAC Resolution (Role + Action)
+                                                          • Tenant Active Status & Plan Verification
+                                                          • Scoped Context Injection (g.tenant_id)
+                                              │
+       ========================================================================================
+                                  BUSINESS DOMAINS (MODULAR CORE)
+       ========================================================================================
+       ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐
+       │   Identity &     │ │  Organization &  │ │ Academic Engine  │ │ Attendance Core  │
+       │   Auth Domain    │ │  Subscription    │ │ (Dept, Batch,    │ │ (Mark, Recalculate,│
+       │ (Login, Refresh) │ │ (Tenants, Plans) │ │  Courses)        │ │  Audit Logs)     │
+       └────────┬─────────┘ └────────┬─────────┘ └────────┬─────────┘ └────────┬─────────┘
+                │                    │                    │                    │
+       ┌────────┴─────────┐ ┌────────┴─────────┐ ┌────────┴─────────┐ ┌────────┴─────────┐
+       │  Notification    │ │ Report Generator │ │  Data Import /   │ │ Platform Audit   │
+       │     Domain       │ │ (PDF, CSV Export │ │  Export Pipeline │ │  & Observability │
+       │ (Email/SMS Queue)│ │  Engine)         │ │ (Bulk Students)  │ │  Dispatcher      │
+       └────────┬─────────┘ └────────┬─────────┘ └────────┬─────────┘ └────────┬─────────┘
+                │                    │                    │                    │
+                └────────────────────┼────────────────────┴────────────────────┘
+                                     │
+                 ┌───────────────────┴───────────────────┐
+                 │ Synchronous (Low Latency)             │ Asynchronous (Deferred)
+                 ▼                                       ▼
+       ===================================     ================================================
+            PRIMARY PERSISTENCE & CACHE             MESSAGING & BACKGROUND PROCESSING
+       ===================================     ================================================
+       ┌─────────────────────────────────┐     ┌──────────────────────────────────────────────┐
+       │       Redis In-Memory Bus       │     │          Redis Pub/Sub & Task Broker         │
+       │ • Revoked JWT Deny-list         │     │         (RQ / Celery Distributed Queue)      │
+       │ • Tenant Configuration Cache    │     └──────────────────────┬───────────────────────┘
+       │ • Tenant-Aware Rate-Limit State │                            │
+       └────────────────┬────────────────┘                            ▼
+                        │                      ┌──────────────────────────────────────────────┐
+                        ▼                      │            Async Worker Cluster              │
+       ┌─────────────────────────────────┐     │ • PDF/CSV Report Generation Service          │
+       │   Primary PostgreSQL Cluster    │     │ • Bulk CSV Student Import Processor          │
+       │ (Multi-Tenant Row-Level Security│     │ • Threshold Attendance Calculation Daemon    │
+       │  + Partitioned Daily Logs)      │     │ • Notification Dispatcher (Email / SMS)      │
+       │ • Platform Schema: Subscriptions│     └──────────────────────┬───────────────────────┘
+       │ • Tenant Data: Classes/Records  │                            │
+       └─────────────────────────────────┘                            │
+                                                                      │
+       ========================================================================================
+                                    EXTERNAL INTEGRATIONS
+       ========================================================================================
+                ▲                                ▲                            ▲
+                │ S3 SDK                         │ Webhooks/REST              │ REST API
+                ▼                                ▼                            ▼
+       ┌──────────────────┐            ┌──────────────────┐          ┌──────────────────┐
+       │ AWS S3 / Cloud   │            │ Razorpay / Stripe│          │ Twilio / SendGrid│
+       │ Storage          │            │ Billing Provider │          │ Delivery Gateway │
+       │ (Reports & CSVS) │            │ (SaaS Billing)   │          │ (Alerts & Emails)│
+       └──────────────────┘            └──────────────────┘          └──────────────────┘
+
+
+2. Detailed Component Architecture
+
++------------------------------------------------------------------------------------------------------------------------+
+|                                                      CLIENT TIER                                                       |
+|                                                                                                                        |
+|  [Student Portal]                     [Faculty Portal]                 [Admin Portal]          [Platform SuperAdmin]   |
+|  • Responsive Web UI                  • Session Roster View            • Department/Course Mgmt• Tenant Lifecycle Mgmt |
+|  • Subject Ratios & Trends            • Instant Present/Absent Grid    • Faculty Assignment    • Subscription Limits   |
+|  • Warning Visualizer                 • Quick Update Engine            • Institutional Reports • System Health & Audit |
++------------------------------------------------------------+-----------------------------------------------------------+
+                                                             | HTTPS (TLS 1.3 / Strict Cipher Suites)
+                                                             v
++------------------------------------------------------------------------------------------------------------------------+
+|                                              EDGE & INGRESS SECURITY TIER                                              |
+|                                                                                                                        |
+|  [Cloudflare Enterprise Edge]                                                                                          |
+|  • Anycast DNS with instant failover routing                                                                           |
+|  • Web Application Firewall (WAF) blocking SQLi, XSS, CSRF, Malicious Bot Profiling                                    |
+|  • CDN Edge Cache: Static Bundles (HTML5, Bootstrap 5.3 CSS, Feather Icons, Vanilla JS modules)                       |
+|  • SSL Termination at Edge; strict mTLS upstream re-encryption to Application Gateway                                   |
+|                                                                                                                        |
+|  [Ingress Proxy / NGINX Gateway]                                                                                       |
+|  • Dynamic Upstream Routing & Health Check Pings                                                                       |
+|  • Tenant-aware Rate Limiter: 100 req/min per unauthenticated IP; 1,000 req/min per authenticated Tenant Token         |
+|  • Security Headers: Strict-Transport-Security, Content-Security-Policy, X-Frame-Options: DENY, X-Content-Type: nosniff|
++------------------------------------------------------------+-----------------------------------------------------------+
+                                                             | HTTP/1.1 (Private VPC Subnet, Non-Routable IP)
+                                                             v
++------------------------------------------------------------------------------------------------------------------------+
+|                                            APPLICATION CORE: MODULAR MONOLITH                                          |
+|                                                                                                                        |
+|  +------------------------------------------------------------------------------------------------------------------+  |
+|  | Request Interception & Tenant Security Context Pipeline                                                          |  |
+|  | 1. TenantResolver: Resolves tenant_id via `X-Tenant-ID` header or mapped hostname (e.g., college.attendora.com).  |  |
+|  | 2. AuthTokenValidator: Decodes RS256 JWT, checks signature, validates issuer/audience, checks Redis revoke cache.|  |
+|  | 3. RBACEnforcer: Matches `user_role` against module access definitions (Student, Faculty, Admin, SuperAdmin).     |  |
+|  | 4. SecurityContextInjector: Sets thread-local `g.tenant_id`, `g.user_id`, and `g.role` for the execution lifecycle.|  |
+|  +---------------------------------------------------------+--------------------------------------------------------+  |
+|                                                            |                                                           |
+|  +---------------------------------------------------------v--------------------------------------------------------+  |
+|  | Domain Modules (Bounded Contexts)                                                                                |  |
+|  |                                                                                                                  |  |
+|  | [Identity & Access]        [Tenant & Subscription]      [Academic Structure]        [Attendance Engine]          |  |
+|  | • Argon2id Passwords       • Plan Quota Enforcer        • Department Bounded Context • Bulk Grid Marking Session |  |
+|  | • JWT Minting / Rotating   • Max Student/Faculty Guard  • Course & Subject Mapping  • Lock-on-Submit Mechanism   |  |
+|  | • Reset Token Lifecycle    • Billing Webhook Processor  • Student Batch Enrollment  • Roster Delta Calculations  |  |
+|  |                                                                                                                  |  |
+|  | [Alerts & Notification]    [Reporting & Analytics]      [Batch Importer Engine]     [Audit Trail System]         |  |
+|  | • Shortage Monitor (<75%)  • Cumulative CSV Exporters   • Streaming CSV Parser      • Mutation Interceptor       |  |
+|  | • Dynamic Message Formatter• PDF Template Renderer      • Transactional Batch Insert• Append-only Audit Log     |  |
+|  | • Channel Routing (Email)  • S3 Presigned URL Minting   • Dry-Run Schema Validator  • Correlation ID Tracking    |  |
+|  +---------------------------------------------------------+--------------------------------------------------------+  |
+|                                                            |                                                           |
+|  +---------------------------------------------------------v--------------------------------------------------------+  |
+|  | Tenant-Scoped Data Access Layer (DAL)                                                                             |  |
+|  | • Automatic Injection: Forces `WHERE tenant_id = :current_tenant_id` on every SELECT, UPDATE, DELETE query.       |  |
+|  | • PostgreSQL Session Set: Runs `SET LOCAL app.current_tenant_id = '...'` upon acquiring connection from pool.     |  |
+|  | • Database Connection Pool: SQLAlchemy with QueuePool (50 max connections, 10 overflow, 30s timeout).            |  |
+|  +---------------------------------------------------------+--------------------------------------------------------+  |
++------------------------------------------------------------+-----------------------------------------------------------+
+                                                             |
+                   +-----------------------------------------+-----------------------------------------+
+                   | Synchronous Queries                                                               | Async Message Enqueue
+                   v                                                                                   v
++------------------------------------------------------+  +--------------------------------------------------------------+
+|             PERSISTENCE & CACHING TIER               |  |              ASYNCHRONOUS PROCESSING TIER                    |
+|                                                      |  |                                                              |
+| [Redis 7 Enterprise Cluster]                         |  | [Redis Broker / Message Queue]                               |
+| • Structure: Master-Replica with Sentinel Failover   |  | • Queue: `high_priority` (Auth emails, Password Resets)      |
+| • Keyspace:                                          |  | • Queue: `default` (Attendance Audit Dispatches)             |
+|   - `blacklist:jti:<jti>` -> TTL (Token Revocation)  |  | • Queue: `low_priority` (PDF Reports, Bulk CSV Student Imps) |
+|   - `tenant:config:<tenant_id>` -> JSON (Cached Meta)|  | • Queue: `dead_letter_queue` (Failed task inspection)        |
+|   - `ratelimit:<tenant_id>:<ip>` -> Token Bucket     |  |                                                              |
+|                                                      |  | [Background Worker Cluster (Python Celery / RQ)]             |
+| [PostgreSQL 16 Managed Primary + Standby Replicas]   |  | • Worker-Report: Compiles monthly reports, uploads to S3     |
+| • Partitioned Tables: `attendance_records` by Range  |  | • Worker-Import: Validates, sanitizes, and maps bulk CSV rows|
+| • Row-Level Security (RLS) policies hard-enforced    |  | • Worker-Notification: Rate-limited API calls to ESPs        |
+| • Automated WAL streaming to point-in-time recovery  |  | • Worker-Shortage: Nightly cron scanning low attendance rates |
++------------------------------------------------------+  +--------------------------------------------------------------+
+
+
+3. SaaS Multi-Tenancy & Data Isolation Model
+
+3.1 Evaluation of Multi-Tenancy Models
+
+Multi-Tenancy Architectural ModelInfrastructure Cost for Low-Tier/Free College TierOperational Maintenance & DB MigrationsSecurity & Tenant Data Isolation AssuranceArchitectural Selection for AttendoraSeparate DB per TenantVery High: Micro-allocations exhaust connection pools; idle colleges consume baseline resources.Complex: Migrations must loop across hundreds of tenant DBs; backup schedules become unwieldy.Absolute: Physical database separation guarantees zero risk of data leakage.Rejected: Financially unviable under budget constraints; excessive operational overhead.Shared DB / Separate SchemaMedium: Moderate memory footprint; schema overhead scales linearly with tenant count.Medium: Standard Postgres migration tooling requires multi-schema loops; cross-schema queries stall.High: Logical schema boundaries isolate tables, but connection pool exhaustion remains a risk.Rejected: Overhead of running DDL for hundreds of college schemas creates severe operational friction.Shared DB / Shared Schema (with RLS)Optimized / Lowest: Single database pool serves all tenants; minimal idle overhead.Unified: Single DDL schema migration applies instantly across the entire platform.High / Industry-Standard: Native kernel-level Postgres Row-Level Security (RLS) blocks cross-tenant leakage.Selected (Primary Architecture): Delivers cost efficiency with strict security compliance.
+
+3.2 Tenant Isolation Mechanism
+
+
+
+
+
+Every Tenant-Scoped Table contains a non-nullable tenant_id UUID REFERENCES tenants(id) ON DELETE RESTRICT.
+
+
+
+PostgreSQL Row-Level Security (RLS) is enabled on all tenant-specific tables:
+
+SQL
+
+ALTER TABLE attendance_records ENABLE ROW LEVEL SECURITY;
+ALTER TABLE attendance_records FORCE ROW LEVEL SECURITY;
+
+CREATE POLICY tenant_isolation_policy ON attendance_records
+    FOR ALL
+    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::uuid);
+
+
+
+
+Application Session Binding: When the Flask backend checks out a database connection from the SQLAlchemy connection pool, an event listener initializes the session:
+
+Python
+
+@event.listens_for(Engine, "checkout")
+def receive_checkout(dbapi_connection, connection_record, connection_proxy):
+    cursor = dbapi_connection.cursor()
+    tenant_id = getattr(g, "tenant_id", None)
+    if tenant_id:
+        cursor.execute(f"SET LOCAL app.current_tenant_id = '{tenant_id}';")
+    else:
+        cursor.execute("RESET app.current_tenant_id;")
+    cursor.close()
+
+
+                        INCOMING HTTP REQUEST
+                                  │
+                                  ▼
+           ┌──────────────────────────────────────────────┐
+           │        Tenant Resolution Middleware          │
+           │ • Read Subdomain (e.g. gcoerc.attendora.com) │
+           │ • OR Read Header `X-Tenant-ID`               │
+           └──────────────────────┬───────────────────────┘
+                                  │
+                                  ▼
+           ┌──────────────────────────────────────────────┐
+           │        Cryptographic JWT Interceptor         │
+           │ • Verify Claims: `sub=user_id`               │
+           │ • Verify Claims: `tid=tenant_id`             │
+           │ • Assert Request Tenant Matches JWT Tenant   │
+           └──────────────────────┬───────────────────────┘
+                                  │ Validated Security Context
+                                  ▼
+           ┌──────────────────────────────────────────────┐
+           │ Thread-Local Flask Context (`flask.g`)       │
+           │ `g.tenant_id = "8f3b2e1a-..."`               │
+           │ `g.user_id   = "4c5d6e7f-..."`               │
+           │ `g.user_role = "FACULTY"`                    │
+           └──────────────────────┬───────────────────────┘
+                                  │
+                                  ▼
+           ┌──────────────────────────────────────────────┐
+           │          SQLAlchemy Data Access Layer        │
+           │ Auto-applies: session.execute(               │
+           │   "SET LOCAL app.current_tenant_id = :tid"   │
+           │ ) on checkout                                │
+           └──────────────────────┬───────────────────────┘
+                                  │
+                                  ▼
+      ┌────────────────────────────────────────────────────────┐
+      │          PostgreSQL Database (Engine Kernel)           │
+      │                                                        │
+      │   SELECT * FROM attendance_records                     │
+      │   WHERE session_id = '...'                             │
+      │                                                        │
+      │   [RLS Engine Intercepts & Appends Filter]             │
+      │   AND tenant_id = current_setting('app.current_tenant')│
+      │                                                        │
+      │   -------------------------------------------------    │
+      │   Tenant A Rows (gcoerc)   ──> [Accessible]            │
+      │   Tenant B Rows (sppu)     ──> [BLOCKED AT KERNEL]     │
+      └────────────────────────────────────────────────────────┘
+
+
+4. End-to-End SaaS Business & Data Flows
+
+4.1 Flow 1: Tenant Provisioning & Admin Onboarding
+
+Lifecycle orchestration from initial contract to ready-to-use tenant environment.
+
+SuperAdmin              API Gateway           Tenant Module        DB (Shared)           Async Queue         Email Service
+    │                        │                      │                   │                     │                    │
+    │ POST /platform/tenants │                      │                   │                     │                    │
+    │───────────────────────>│                      │                   │                     │                    │
+    │                        │ Invoke (Scoped SA)   │                   │                     │                    │
+    │                        │─────────────────────>│                   │                     │                    │
+    │                        │                      │ Begin Transaction │                     │                    │
+    │                        │                      │──────────────────>│                     │                    │
+    │                        │                      │ Insert `tenants`  │                     │                    │
+    │                        │                      │ Insert Admin User │                     │                    │
+    │                        │                      │ Commit            │                     │                    │
+    │                        │                      │<──────────────────│                     │                    │
+    │                        │                      │                                         │                    │
+    │                        │                      │ Enqueue Welcome/Activation Email        │                    │
+    │                        │                      │────────────────────────────────────────>│                    │
+    │                        │                      │                                         │ Pop Task           │
+    │                        │                      │                                         │───────────────────>│
+    │                        │                      │                                         │                    │ Dispatch
+    │                        │ 201 Created          │                                         │                    │─────────> Admin User
+    │<───────────────────────│                      │                                         │                    │
+
+
+4.2 Flow 2: Bulk Student Enrollment via CSV (Asynchronous)
+
+Safely importing student rosters without HTTP timeouts.
+
+College Admin         Client UI            API Gateway          App Server           S3 Bucket           Async Worker         PostgreSQL
+    │                      │                     │                   │                   │                    │                   │
+    │ Upload Roster CSV    │                     │                   │                   │                    │                   │
+    │─────────────────────>│                     │                   │                   │                    │                   │
+    │                      │ POST /students/bulk │                   │                   │                    │                   │
+    │                      │ (Multipart Form)    │                   │                   │                    │                   │
+    │                      │────────────────────>│ Stream File       │                   │                    │                   │
+    │                      │                     │──────────────────>│ Put Object (Temp) │                    │                   │
+    │                      │                     │                   │──────────────────>│                    │                   │
+    │                      │                     │                   │                   │                    │                   │
+    │                      │                     │                   │ Enqueue `process_bulk_student_csv`     │                   │
+    │                      │                     │                   │ (payload: {tenant_id, file_key})       │                   │
+    │                      │                     │                   │───────────────────────────────────────>│                   │
+    │                      │                     │ 202 Accepted      │                                        │                   │
+    │                      │<────────────────────│ (Returns Job ID)  │                                        │                   │
+    │                      │                     │                   │                                        │ Fetch S3 Object   │
+    │                      │                     │                   │                                        │<──────────────────│
+    │                      │                     │                   │                                        │                   │
+    │                      │                     │                   │                                        │ Stream Parse &    │
+    │                      │                     │                   │                                        │ Batch Insert (RLS)│
+    │                      │                     │                   │                                        │──────────────────>│
+    │                      │ GET /jobs/{job_id}  │                   │                                        │ Update Job Status │
+    │                      │ (Polling Progress)  │                   │                                        │ to "COMPLETED"    │
+    │                      │────────────────────>│ Query Job Status  │                                        │                   │
+    │                      │                     │──────────────────>│                                        │                   │
+
+
+4.3 Flow 3: Real-Time Attendance Marking Session (Synchronous + Audit Dispatch)
+
+The core operational loop executed by faculty.
+
+Faculty Device        Client App            API Gateway         Attendance Engine     PostgreSQL (RLS)        Async Broker
+    │                      │                     │                      │                    │                     │
+    │ Click "Submit Roster"│                     │                      │                    │                     │
+    │ (Present/Absent List)│                     │                      │                    │                     │
+    │─────────────────────>│                     │                      │                    │                     │
+    │                      │ POST /attendance    │                      │                    │                     │
+    │                      │ Headers: Bearer JWT │                      │                    │                     │
+    │                      │────────────────────>│ Validate Token & RLS │                    │                     │
+    │                      │                     │─────────────────────>│ Open Transaction   │                     │
+    │                      │                     │                      │───────────────────>│                     │
+    │                      │                     │                      │ Prevent Duplicate: │                     │
+    │                      │                     │                      │ Query existing     │                     │
+    │                      │                     │                      │ for Course+Slot+Date                     │
+    │                      │                     │                      │<───────────────────│                     │
+    │                      │                     │                      │ Bulk Insert Status │                     │
+    │                      │                     │                      │ (Present / Absent) │                     │
+    │                      │                     │                      │───────────────────>│                     │
+    │                      │                     │                      │ Commit Transaction │                     │
+    │                      │                     │                      │<───────────────────│                     │
+    │                      │                     │                      │                                          │
+    │                      │                     │                      │ Enqueue Event: `AttendanceMarkedEvent`   │
+    │                      │                     │                      │ - Trigger shortage recalculations        │
+    │                      │                     │                      │ - Write operational audit logs           │
+    │                      │                     │                      │─────────────────────────────────────────>│
+    │                      │                     │ 201 Created          │                                          │
+    │                      │<────────────────────│ (Summary Counts)     │                                          │
+    │                      │                     │                      │                                          │
+    │ Update UI Grid State │                     │                      │                                          │
+    │ (Green Checkmarks)   │                     │                      │                                          │
+    │<─────────────────────│                     │                      │                                          │
+
+
+4.4 Flow 4: Low-Attendance Detection & Alert Pipeline (Nightly Engine)
+
+Automated alert loop identifying students falling below regulatory compliance thresholds (e.g., <75%).
+
+Scheduled Daemon (Cron)    Attendance Engine    PostgreSQL (Read Replica)    Notification Domain    Worker Pool     Email Provider
+          │                        │                         │                        │                  │                │
+          │ Trigger Nightly Sweep  │                         │                        │                  │                │
+          │───────────────────────>│                         │                        │                  │                │
+          │                        │ Query Student Aggregate │                        │                  │                │
+          │                        │ Attendance Ratios       │                        │                  │                │
+          │                        │ WHERE pct < 75.0        │                        │                  │                │
+          │                        │────────────────────────>│                        │                  │                │
+          │                        │ Returns Low Attendants  │                        │                  │                │
+          │                        │<────────────────────────│                        │                  │                │
+          │                        │                                                  │                  │                │
+          │                        │ Filter: Threshold Alerts Not Dispatched in 7 Days│                  │                │
+          │                        │─────────────────────────────────────────────────>│                  │                │
+          │                        │                                                  │ Enqueue Warning Tasks            │
+          │                        │                                                  │─────────────────>│                │
+          │                        │                                                  │                  │ Dispatch Email │
+          │                        │                                                  │                  │───────────────>│
+
+
+5. Domain-Driven Database Architecture
+
+========================================================================================================================
+                                               PLATFORM METADATA SCHEMA
+========================================================================================================================
+[tenants]
+• id: UUID (PK)
+• name: VARCHAR(255)
+• slug: VARCHAR(100) (UNIQUE)  -- e.g., 'gcoerc'
+• custom_domain: VARCHAR(255)
+• subscription_plan: ENUM ('FREE_TIER', 'PRO_COLLEGE', 'INSTITUTIONAL_ENTERPRISE')
+• subscription_status: ENUM ('ACTIVE', 'PAST_DUE', 'CANCELLED', 'TRIAL')
+• student_quota_limit: INTEGER (Default: 500)
+• created_at: TIMESTAMPTZ
+
+[platform_superadmins]
+• id: UUID (PK)
+• email: VARCHAR(255) (UNIQUE)
+• password_hash: VARCHAR(255) (Argon2id)
+• is_active: BOOLEAN
+
+[tenant_subscriptions]
+• id: UUID (PK)
+• tenant_id: UUID (FK -> tenants.id)
+• external_customer_id: VARCHAR(255) -- Gateway mapping
+• current_period_end: TIMESTAMPTZ
+• auto_renew: BOOLEAN
+
+========================================================================================================================
+                                           TENANT-SCOPED SCHEMA (RLS ENABLED)
+========================================================================================================================
+[users]
+• id: UUID (PK)
+• tenant_id: UUID (FK -> tenants.id, INDEXED)  <-- Mandatory for RLS
+• email: VARCHAR(255)
+• password_hash: VARCHAR(255)
+• role: ENUM ('COLLEGE_ADMIN', 'FACULTY', 'STUDENT')
+• full_name: VARCHAR(150)
+• is_active: BOOLEAN
+• UNIQUE (tenant_id, email)
+
+[departments]
+• id: UUID (PK)
+• tenant_id: UUID (FK -> tenants.id, INDEXED)
+• code: VARCHAR(50)                            -- e.g., 'COMP-ENG'
+• name: VARCHAR(150)
+• UNIQUE (tenant_id, code)
+
+[academic_batches]
+• id: UUID (PK)
+• tenant_id: UUID (FK -> tenants.id, INDEXED)
+• department_id: UUID (FK -> departments.id)
+• academic_year: VARCHAR(20)                   -- e.g., '2025-2026'
+• semester: INTEGER                            -- e.g., 6
+• division: VARCHAR(10)                        -- e.g., 'A'
+
+[courses]
+• id: UUID (PK)
+• tenant_id: UUID (FK -> tenants.id, INDEXED)
+• department_id: UUID (FK -> departments.id)
+• course_code: VARCHAR(50)                    -- e.g., 'CS601'
+• course_name: VARCHAR(150)
+• default_minimum_attendance_pct: NUMERIC(5,2) DEFAULT 75.00
+
+[course_faculty_assignments]
+• id: UUID (PK)
+• tenant_id: UUID (FK -> tenants.id, INDEXED)
+• course_id: UUID (FK -> courses.id)
+• faculty_id: UUID (FK -> users.id)
+• batch_id: UUID (FK -> academic_batches.id)
+
+[student_enrollments]
+• id: UUID (PK)
+• tenant_id: UUID (FK -> tenants.id, INDEXED)
+• student_id: UUID (FK -> users.id)
+• batch_id: UUID (FK -> academic_batches.id)
+• roll_number: VARCHAR(50)
+• prn_number: VARCHAR(50)                      -- Permanent Registration Number
+• UNIQUE (tenant_id, student_id, batch_id)
+
+[attendance_sessions]
+• id: UUID (PK)
+• tenant_id: UUID (FK -> tenants.id, INDEXED)
+• course_id: UUID (FK -> courses.id)
+• batch_id: UUID (FK -> academic_batches.id)
+• faculty_id: UUID (FK -> users.id)
+• session_date: DATE
+• slot_start_time: TIME
+• slot_end_time: TIME
+• is_locked: BOOLEAN DEFAULT TRUE              -- Lock on submit to prevent unauthorized tampering
+• created_at: TIMESTAMPTZ
+
+[attendance_records]  <-- PARTITIONED BY RANGE (session_date)
+• id: BIGSERIAL
+• tenant_id: UUID (FK -> tenants.id, INDEXED)
+• session_id: UUID (FK -> attendance_sessions.id, INDEXED)
+• student_id: UUID (FK -> users.id, INDEXED)
+• status: ENUM ('PRESENT', 'ABSENT', 'EXCUSED')
+• marked_at: TIMESTAMPTZ
+• PRIMARY KEY (id, session_date)
+
+[audit_logs]
+• id: BIGSERIAL (PK)
+• tenant_id: UUID (FK -> tenants.id, INDEXED)
+• actor_id: UUID (FK -> users.id)
+• action: VARCHAR(100)                         -- e.g., 'ATTENDANCE_OVERRIDE', 'STUDENT_EXPEL'
+• entity_type: VARCHAR(50)
+• entity_id: VARCHAR(50)
+• ip_address: INET
+• user_agent: VARCHAR(255)
+• old_state: JSONB
+• new_state: JSONB
+• created_at: TIMESTAMPTZ (IMMUTABLE)
+
+
+6. Security, Identity & Compliance Architecture
+
++------------------------------------------------------------------------------------------------------------------------+
+|                                         IDENTITY & ACCESS MANAGEMENT LIFECYCLE                                         |
++------------------------------------------------------------------------------------------------------------------------+
+                                                             |
+                                           [POST /api/v1/auth/login]
+                                   Payload: {email, password, tenant_slug}
+                                                             |
+                                                             v
+                          +------------------------------------------------------+
+                          |                 Identity Provider Service            |
+                          | 1. Query `tenants` table by `slug`.                  |
+                          |    Assert status == ACTIVE.                          |
+                          | 2. Fetch user record for (email, tenant_id).         |
+                          | 3. Verify Argon2id password hash.                    |
+                          | 4. Fetch Role & Scoped Permissions.                  |
+                          | 5. Generate RS256 Asymmetric Signed JWT Pair.        |
+                          +--------------------------+---------------------------+
+                                                     |
+                         +---------------------------+---------------------------+
+                         |                                                       |
+                         v                                                       v
+        +----------------------------------+                   +----------------------------------+
+        | Access Token (Stateless)         |                   | Refresh Token (Stateful)         |
+        | • Lifetime: 15 Minutes           |                   | • Lifetime: 7 Days               |
+        | • Storage: Memory / Auth Header  |                   | • Storage: HttpOnly, Secure,     |
+        | • Claims:                        |                   |            SameSite=Strict Cookie|
+        |   - `sub`: User UUID             |                   | • Persistence: Hashed in Redis   |
+        |   - `tid`: Tenant UUID           |                   | • Rotation: Destroyed & reminted |
+        |   - `rol`: FACULTY | ADMIN | STU |                   |             on every invocation  |
+        |   - `jti`: Unique Token ID       |                   +----------------------------------+
+        +----------------------------------+
+
+
+6.1 Role-Based Access Control (RBAC) Matrix
+
+System Domain / ActionPlatform SuperAdminCollege AdminFaculty MemberStudentTenant Provisioning / SuspendCRUDDeniedDeniedDeniedPlan Quota & Tier ModificationCRUDRead OnlyDeniedDeniedFaculty & Student Account MgmtDeniedCRUDRead (Roster Only)DeniedDepartment / Course MappingDeniedCRUDRead OnlyRead OnlySubmit Attendance RecordsDeniedOverride OnlyCreate / UpdateDeniedView Personal Attendance StatsDeniedRead AllRead (Assigned Classes)Read Own OnlyDownload Institutional ReportsDeniedExport AllExport AssignedExport Own SummaryAudit Log InspectionGlobal Platform LogsTenant Scope OnlyDeniedDenied
+
+6.2 Security Boundaries & Threat Mitigations
+
+
+
+
+
+Tenant Isolation Breach Prevention: Even if an application bug omits WHERE tenant_id = ..., PostgreSQL RLS policies evaluate the active session variable app.current_tenant_id at the database kernel level and return zero records for cross-tenant attempts.
+
+
+
+Session Hijacking Mitigation: Short-lived 15-minute access tokens minimize exposure. Immediate token revocation is supported via a high-performance Redis Deny-List (SET blacklist:jti:<uuid> EX 900).
+
+
+
+Input Hygiene: Strict Pydantic models validate all incoming payloads prior to domain dispatch, blocking SQL injection, parameter tampering, and cross-site scripting attempts.
+
+7. Scalability, Caching & Asynchronous Infrastructure
+
++------------------------------------------------------------------------------------------------------------------------+
+|                                           CACHING & WRITE CONCURRENCY STRATEGY                                         |
++------------------------------------------------------------------------------------------------------------------------+
+
+      Read Request Path:                                                Write Request Path:
+      ==================                                                ===================
+      [Incoming GET Request]                                            [Incoming POST / PUT Request]
+                │                                                                 │
+                ▼                                                                 ▼
+      [Redis Cache Lookup]                                              [PostgreSQL Primary Write]
+      Key: `tenant:{id}:course:{id}:stats`                              Row updated within Transaction
+                │                                                                 │
+       ┌────────┴────────┐                                                        ▼
+       ▼                 ▼                                              [Evict Associated Cache Keys]
+  [Cache Hit]      [Cache Miss]                                         DEL `tenant:{id}:course:{id}:stats`
+  Return payload   Fetch from PostgreSQL Read Replica                             │
+  (< 5ms)          Write to Redis (TTL: 3600s)                                    ▼
+                   Return payload                                       [Publish Invalidation Event]
+
+
+7.1 Async Worker Allocation & Queue Topography
+
+                                      ┌─────────────────────────────────────────────────────────┐
+                                      │              Redis Queue Management (Broker)            │
+                                      └────────────────────────────┬────────────────────────────┘
+                                                                   │
+                         ┌─────────────────────────────────────────┼────────────────────────────────────────┐
+                         │ High-Priority Tasks                     │ Standard Batch Tasks                   │ Heavy Compute Tasks
+                         ▼                                         ▼                                        ▼
+      ┌────────────────────────────────────┐    ┌───────────────────────────────────┐    ┌───────────────────────────────────┐
+      │ Queue: `auth_notifications`        │    │ Queue: `attendance_side_effects`  │    │ Queue: `export_and_reports`       │
+      ├────────────────────────────────────┤    ├───────────────────────────────────┤    ├───────────────────────────────────┤
+      │ • Password Reset Tokens            │    │ • Recalculate Aggregate Ratios    │    │ • Multi-year PDF Report Rendering │
+      │ • Welcome & Activation Emails      │    │ • Low-Attendance Threshold Checks │    │ • Bulk Student Roster CSV Parse   │
+      │ • SMS Shortage Urgent Warnings     │    │ • Write Audit Trail Append-Logs   │    │ • End-of-Term ZIP Bundle Archiving│
+      └─────────────────┬──────────────────┘    └─────────────────┬─────────────────┘    └─────────────────┬─────────────────┘
+                        │                                         │                                        │
+                        ▼                                         ▼                                        ▼
+      ┌────────────────────────────────────┐    ┌───────────────────────────────────┐    ┌───────────────────────────────────┐
+      │ Worker Pool A (Fast Latency)       │    │ Worker Pool B (Transactional)     │    │ Worker Pool C (Compute Heavy)     │
+      │ 2-4 Instances                      │    │ 4-8 Instances                     │    │ 2-6 Auto-Scaling Instances        │
+      │ Concurrency: 20 Greenlets/Threads  │    │ Concurrency: 10 Worker Processes  │    │ Concurrency: 2 Processes (Mem-Iso)│
+      └────────────────────────────────────┘    └───────────────────────────────────┘    └───────────────────────────────────┘
+
+
+8. Reliability, Observability & Operational Resilience
+
+8.1 Resilience Controls
+
+
+
+
+
+Circuit Breaker Pattern: Integrated around third-party API gateways (SendGrid/Twilio/Razorpay). If failures exceed 50% over a 60-second window, the circuit trips to OPEN, instantly routing fallback messages to a pending retry table and preventing web worker thread starvation.
+
+
+
+Database Connection Stability: Managed via PgBouncer in transaction-pooling mode. This prevents connection saturation when application instances scale out during morning attendance peak windows (08:30 AM – 10:30 AM).
+
+
+
+Idempotent Write Safety: Attendance session submission endpoints require a client-generated UUID idempotency key (Idempotency-Key: <uuid>). Duplicate requests caused by erratic network retries return the original cached response without re-executing writes.
+
+8.2 Observability Architecture
+
+Every request is tagged at the Edge Ingress with an immutable, tenant-aware tracing header:X-Correlation-ID: <uuid> and X-Tenant-Slug: <slug>
+
+[Ingress Proxy] ──> Logs: [req_id, tenant_slug, ip, latency_ms] ──┐
+[Flask Modular Core] ──> Structured JSON: [req_id, tenant_id, trace] ────┼──> [OpenTelemetry Collector]
+[PostgreSQL Database] ──> Slow Query Logs (>200ms) with tenant_id   ──┤              │
+                                                                                    ▼
+                                                                     ┌──────────────────────────────┐
+                                                                     │     Observability Plane      │
+                                                                     │ • Grafana: Real-Time Metrics │
+                                                                     │ • Loki: Centralized Logs     │
+                                                                     │ • Tempo: Distributed Tracing │
+                                                                     │ • Sentry: Exception Tracker  │
+                                                                     └──────────────────────────────┘
+
+
+9. Infrastructure, CI/CD Pipeline & Deployment Topology
+
+Developer Workstation
+      │
+      ▼ Git Push
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ GitHub Actions CI/CD Pipeline                                                          │
+│                                                                                        │
+│ [Lint & Static Analysis]  ──> [Unit Tests & Domain Rules] ──> [RLS Leakage Tests]      │
+│  (Flake8, Black, Bandit)       (Pytest, 90%+ Coverage)        (Cross-Tenant Asserts)   │
+│                                                                                        │
+│ ──> [Docker Multi-Stage Build] ──> [Trivy Vulnerability Scan] ──> [AWS ECR / Registry] │
+└───────────────────────────────────────────┬────────────────────────────────────────────┘
+                                            │
+                     ┌──────────────────────┴──────────────────────┐
+                     │ Semantic Release / Tag Deployment           │
+                     ▼                                             ▼
+┌────────────────────────────────────────┐   ┌───────────────────────────────────────────┐
+│ Staging Environment                    │   │ Production Environment (AWS VPC / Multi-AZ│
+│ • Single Node App Runner / Render      │   │ • Multi-AZ Public / Private Subnets       │
+│ • Shared PostgreSQL + Redis Sandbox    │   │ • Blue/Green Zero-Downtime ECS Fargate    │
+│ • Mock Third-Party APIs                │   │ • Aurora PostgreSQL Multi-AZ with Standby │
+└────────────────────────────────────────┘   └───────────────────────────────────────────┘
+
+
+9.1 Production Infrastructure Specification
+
+
+
+
+
+Edge Networking: Cloudflare Enterprise configured with Web Application Firewall, HTTP/3, and DDoS mitigation rules.
+
+
+
+Compute Plane: AWS ECS Fargate running multi-stage Docker containers with Python 3.12 and Gunicorn workers managed by Uvicorn workers. Auto-scaling triggers scale from 2 pods up to 16 pods based on CPU utilization (>70%) and request queue depth.
+
+
+
+Database Cluster: Amazon Aurora PostgreSQL Serverless v2 (scaling from 0.5 to 16 ACUs), deployed across two Availability Zones with automated continuous backup and 1-minute RPO.
+
+
+
+Storage: Amazon S3 standard bucket for generated PDF/CSV reports, with automated lifecycle transition to S3 Glacier after 90 days.
+
+10. Architecture Legend
+
+┌───────────────────────────────────────────────────────────────────────────────────────┐
+│                                   ARCHITECTURE LEGEND                                 │
+├───────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                       │
+│   ────────────►   Synchronous Network Communication (REST, HTTP/1.1, TLS 1.3)         │
+│                   - Blocks until response or timeout occurs.                          │
+│                                                                                       │
+│   - - - - - - >   Asynchronous Non-Blocking Call (Redis Pub/Sub, Queues, Background)  │
+│                   - Decoupled from user interaction path; processed out-of-band.       │
+│                                                                                       │
+│   [ Component ]   Internal Logical Compute Entity / Service Domain                    │
+│                                                                                       │
+│   [[ Data ]]      Stateful Storage / Memory Store (Postgres, Redis, Object Store)     │
+│                                                                                       │
+│   ══ Boundary ══  Hard Security / Network Boundary (VPC Subnet, Ingress Firewall)     │
+│                                                                                       │
+│   ( RLS Shield )  PostgreSQL Row-Level Security Kernel Enforcement Engine             │
+│                                                                                       │
+└───────────────────────────────────────────────────────────────────────────────────────┘
+
+
+11. Architecture Decision Records (ADR) Summary
+
+ADR 01: Multi-Tenancy Strategy
+
+
+
+
+
+Decision: Adopt a Shared Database, Shared Schema model enforced via PostgreSQL Row-Level Security (RLS).
+
+
+
+Context: Attendora targets colleges and universities in Maharashtra with an initial low-cost/freemium model before expanding to paid institutional tiers. Running separate database instances or managing hundreds of individual PostgreSQL schemas would introduce unsustainable operational and infrastructure costs.
+
+
+
+Consequences: Zero infrastructure overhead for onboarding new colleges. Schema migrations execute through a single operational DDL step. Absolute application-level discipline is required to maintain the tenant context, reinforced by automatic session variable injection on every database pool checkout.
+
+ADR 02: Architectural Style
+
+
+
+
+
+Decision: Implement a Modular Monolith in Python Flask/Gunicorn, rather than a distributed Microservices architecture.
+
+
+
+Context: The team size is compact, and the business domain exhibits tightly coupled transactional boundaries between departments, enrollments, sessions, and attendance records. Microservices would introduce distributed transactions, eventual consistency challenges, and network latency without clear benefit.
+
+
+
+Consequences: Retains single-repository deployment and transactional integrity. Clear domain boundaries are enforced within the codebase to allow future extraction of specific modules (e.g., Reports or Notifications) if scaling demands require it.
+
+ADR 03: Database Evolution from Initial Firebase Concept
+
+
+
+
+
+Decision: Shift the primary persistence engine from Firebase NoSQL to Relational PostgreSQL with Range Partitioning.
+
+
+
+Context: Educational attendance management is fundamentally relational. Courses map to departments, students map to batches, and sessions map to courses. Attendance queries require complex aggregations across terms to detect shortages. NoSQL document stores lead to data duplication, loose consistency guarantees, and lack native kernel-level Row-Level Security.
+
+
+
+Consequences: Unlocks standard relational constraints, foreign keys, ACID compliance, and SQL analytics. Attendance tables are partitioned by session_date ranges to preserve high query performance as attendance records scale past millions of rows.
+
+ADR 04: Asynchronous Processing of Exports and Notifications
+
+
+
+
+
+Decision: Route all CSV imports, PDF report builds, and notification dispatches through Redis-backed background queues.
+
+
+
+Context: Faculty members submit attendance simultaneously during class changeover windows. Generating PDF reports or processing large CSV uploads within the synchronous web worker pool would saturate Gunicorn threads and cause gateway timeouts.
+
+
+
+Consequences: Synchronous HTTP response times stay under 150ms. Heavy processing runs on dedicated, auto-scaling worker nodes, preventing spikes in background work from affecting active classroom attendance marking. Here is the design presentation for Attendora:
+
+1. Administrative Web Dashboard (Authoritative View)
+
+
+
+
+
+Target Roles: College Administrators, Department Heads, and Faculty Members.
+
+
+
+Layout & Structure:
+
+
+
+
+
+Navigation Sidebar: Quick access to Departments, Course Allotments, Real-Time Marking, Master Roster, Institutional Reports, and Audit Trails.
+
+
+
+Executive Metrics: High-level overview cards tracking Overall Institutional Attendance, Total Active Batches, Defaulter Ratio (<75%), and Pending Session Submissions.
+
+
+
+Analytics & Roster Engine: Visual bar charts comparing department-wise attendance alongside a data table with batch filtering, CSV export buttons, and quick status toggles.
+
+2. Student Mobile Application (End-User View)
+
+
+
+
+
+Target Roles: Students and Parents/Guardians.
+
+
+
+Layout & Structure:
+
+
+
+
+
+Attendance Progress Ring: Prominent circular gauge displaying aggregate percentage with contextual color indicators (safe above 75%, warning below).
+
+
+
+Subject-Wise Breakdown: Segmented cards for individual courses detailing attended vs. conducted sessions and attendance trends.
+
+
+
+Alerts & Notices: Real-time push notification banners for upcoming attendance shortages and recent faculty submissions.
