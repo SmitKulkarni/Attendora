@@ -10,6 +10,11 @@ import {
   FileSpreadsheet,
   ChevronRight,
   ShieldCheck,
+  QrCode,
+  Send,
+  Cpu,
+  Brain,
+  FileBadge,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -18,6 +23,12 @@ interface SidebarProps {
   openRollCall: () => void;
   openDefaulters: () => void;
   openAuditLog: () => void;
+  openDynamicQr?: () => void;
+  openNotifications?: () => void;
+  openHardware?: () => void;
+  openAiRetention?: () => void;
+  openHallTicket?: () => void;
+  openAccreditation?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -26,6 +37,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   openRollCall,
   openDefaulters,
   openAuditLog,
+  openDynamicQr,
+  openNotifications,
+  openHardware,
+  openAiRetention,
+  openHallTicket,
+  openAccreditation,
 }) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -99,9 +116,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </nav>
 
         {/* Quick Operations Section */}
-        <div className="px-4 pt-3">
+        <div className="px-4 pt-1">
           <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-3 mb-2">
-            Operations
+            Operations & AI Governance
           </div>
           <div className="space-y-1.5">
             <button
@@ -115,18 +132,108 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <ChevronRight className="w-3.5 h-3.5 text-emerald-400" />
             </button>
 
+            {openAiRetention && (
+              <button
+                onClick={openAiRetention}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-purple-500/15 border border-purple-500/30 text-purple-200 hover:bg-purple-500/25 text-xs font-medium transition"
+              >
+                <span className="flex items-center gap-2">
+                  <Brain className="w-3.5 h-3.5 text-purple-400" />
+                  Gemini Retention AI
+                </span>
+                <span className="text-[9px] bg-purple-900/80 text-purple-300 px-1 py-0.5 rounded font-mono font-bold">
+                  AI
+                </span>
+              </button>
+            )}
+
+            {openHallTicket && (
+              <button
+                onClick={openHallTicket}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 hover:bg-amber-500/20 text-xs font-medium transition"
+              >
+                <span className="flex items-center gap-2">
+                  <Award className="w-3.5 h-3.5 text-amber-400" />
+                  Exam Hall-Tickets
+                </span>
+                <span className="text-[9px] bg-amber-900/60 text-amber-300 px-1 py-0.5 rounded font-mono">
+                  Gating
+                </span>
+              </button>
+            )}
+
+            {openAccreditation && (
+              <button
+                onClick={openAccreditation}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 hover:bg-indigo-500/20 text-xs font-medium transition"
+              >
+                <span className="flex items-center gap-2">
+                  <FileBadge className="w-3.5 h-3.5 text-indigo-400" />
+                  NBA / NAAC Audit
+                </span>
+                <span className="text-[9px] bg-indigo-900/60 text-indigo-300 px-1 py-0.5 rounded font-mono">
+                  Accred
+                </span>
+              </button>
+            )}
+
+            {openDynamicQr && (
+              <button
+                onClick={openDynamicQr}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-teal-500/10 border border-teal-500/20 text-teal-300 hover:bg-teal-500/20 text-xs font-medium transition"
+              >
+                <span className="flex items-center gap-2">
+                  <QrCode className="w-3.5 h-3.5 text-teal-400" />
+                  Dynamic QR Display
+                </span>
+                <span className="text-[9px] bg-teal-900/60 text-teal-300 px-1 py-0.5 rounded font-mono">
+                  TOTP
+                </span>
+              </button>
+            )}
+
             <button
               onClick={openDefaulters}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 hover:bg-amber-500/20 text-xs font-medium transition"
+              className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300 hover:bg-slate-800 text-xs font-medium transition"
             >
               <span className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-amber-400" />
+                <span className="w-2 h-2 rounded-full bg-red-400" />
                 Defaulters List
               </span>
-              <span className="text-[10px] bg-amber-900/50 text-amber-300 px-1.5 py-0.5 rounded font-mono">
+              <span className="text-[10px] bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded font-mono">
                 &lt;75%
               </span>
             </button>
+
+            {openNotifications && (
+              <button
+                onClick={openNotifications}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-300 hover:bg-blue-500/20 text-xs font-medium transition"
+              >
+                <span className="flex items-center gap-2">
+                  <Send className="w-3.5 h-3.5 text-blue-400" />
+                  Broadcast Alerts
+                </span>
+                <span className="text-[9px] bg-blue-900/60 text-blue-300 px-1 py-0.5 rounded font-mono">
+                  SMS/WA
+                </span>
+              </button>
+            )}
+
+            {openHardware && (
+              <button
+                onClick={openHardware}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-300 hover:bg-purple-500/20 text-xs font-medium transition"
+              >
+                <span className="flex items-center gap-2">
+                  <Cpu className="w-3.5 h-3.5 text-purple-400" />
+                  Turnstile IoT Ingest
+                </span>
+                <span className="text-[9px] bg-purple-900/60 text-purple-300 px-1 py-0.5 rounded font-mono">
+                  RFID
+                </span>
+              </button>
+            )}
           </div>
         </div>
       </div>

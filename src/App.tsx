@@ -39,12 +39,53 @@ import { RollCallModal } from './components/desktop/RollCallModal.tsx';
 import { DefaultersReportModal } from './components/desktop/DefaultersReportModal.tsx';
 import { CsvImportModal } from './components/desktop/CsvImportModal.tsx';
 import { AuditLogModal } from './components/desktop/AuditLogModal.tsx';
+import { DynamicQrDisplayModal } from './components/desktop/DynamicQrDisplayModal.tsx';
+import { NotificationDispatchModal } from './components/desktop/NotificationDispatchModal.tsx';
+import { HardwareIntegrationModal } from './components/desktop/HardwareIntegrationModal.tsx';
+import { StudentQrScannerModal } from './components/mobile/StudentQrScannerModal.tsx';
+import { AiRetentionModal } from './components/desktop/AiRetentionModal.tsx';
+import { HallTicketGatingModal } from './components/desktop/HallTicketGatingModal.tsx';
+import { AccreditationExportModal } from './components/desktop/AccreditationExportModal.tsx';
+import { Brain, FileBadge } from 'lucide-react';
+import { QrCode, Send, Cpu } from 'lucide-react';
+import {
+  apiClient,
+  fetchStudents,
+  fetchCourses,
+  fetchAttendanceSessions,
+  fetchAuditLogs,
+  submitAttendanceSession,
+  updateStudentRate,
+  bulkImportStudents,
+} from './api/index.ts';
 
 export default function App() {
   // Navigation / View state
   const [viewMode, setViewMode] = useState<'SHOWCASE' | 'DESKTOP' | 'MOBILE'>('SHOWCASE');
   const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USERS[1]); // Default to Faculty/Admin
   const [activeSidebarTab, setActiveSidebarTab] = useState<string>('dashboard');
+  const [isBackendConnected, setIsBackendConnected] = useState<boolean | null>(null);
+
+  // Hydrate live state if backend is online
+  React.useEffect(() => {
+    apiClient.checkBackendHealth().then((online) => {
+      setIsBackendConnected(online);
+      if (online) {
+        fetchStudents().then((st) => {
+          if (st && st.length > 0) setStudents(st);
+        });
+        fetchCourses().then((crs) => {
+          if (crs && crs.length > 0) setCourses(crs);
+        });
+        fetchAttendanceSessions().then((sess) => {
+          if (sess && sess.length > 0) setSessions(sess);
+        });
+        fetchAuditLogs().then((logs) => {
+          if (logs && logs.length > 0) setAuditLogs(logs);
+        });
+      }
+    });
+  }, []);
 
   // Application Data States
   const [students, setStudents] = useState<StudentRecord[]>(INITIAL_STUDENTS);
@@ -59,6 +100,13 @@ export default function App() {
   const [isDefaultersOpen, setIsDefaultersOpen] = useState<boolean>(false);
   const [isCsvImportOpen, setIsCsvImportOpen] = useState<boolean>(false);
   const [isAuditLogOpen, setIsAuditLogOpen] = useState<boolean>(false);
+  const [isDynamicQrOpen, setIsDynamicQrOpen] = useState<boolean>(false);
+  const [isNotificationDispatchOpen, setIsNotificationDispatchOpen] = useState<boolean>(false);
+  const [isHardwareOpen, setIsHardwareOpen] = useState<boolean>(false);
+  const [isStudentScannerOpen, setIsStudentScannerOpen] = useState<boolean>(false);
+  const [isAiRetentionOpen, setIsAiRetentionOpen] = useState<boolean>(false);
+  const [isHallTicketOpen, setIsHallTicketOpen] = useState<boolean>(false);
+  const [isAccreditationOpen, setIsAccreditationOpen] = useState<boolean>(false);
 
   // Deep Link Report State (FR-STU deep link verification)
   const [deepLinkReport, setDeepLinkReport] = useState<{
@@ -100,6 +148,13 @@ export default function App() {
       reason: updatedStudent.notes || 'Direct administrative percentage update',
     };
     setAuditLogs((prev) => [newLog, ...prev]);
+
+    // Dispatch to backend API asynchronously
+    updateStudentRate(
+      updatedStudent.id,
+      updatedStudent.attendanceRate,
+      updatedStudent.notes || 'Direct administrative percentage update'
+    ).catch(() => {});
   };
 
   const handleAddSession = (newSession: AttendanceSession) => {
@@ -161,6 +216,9 @@ export default function App() {
       reason: `Regular lecture roll-call conducted for ${newSession.subjectName}`,
     };
     setAuditLogs((prev) => [auditEntry, ...prev]);
+
+    // Dispatch to backend API asynchronously
+    submitAttendanceSession(newSession).catch(() => {});
   };
 
   const handleImportStudents = (newStudents: StudentRecord[]) => {
@@ -179,6 +237,18 @@ export default function App() {
       reason: 'Batch CSV Roster Ingestion completed under FR-ADM-01',
     };
     setAuditLogs((prev) => [auditEntry, ...prev]);
+
+    // Dispatch to backend API asynchronously
+    bulkImportStudents(
+      newStudents.map((s) => ({
+        rollNo: s.rollNo,
+        fullName: s.name,
+        email: s.email,
+        department: s.department,
+        semester: s.semester,
+        section: s.section,
+      }))
+    ).catch(() => {});
   };
 
   const resetDemoData = () => {
@@ -202,8 +272,12 @@ export default function App() {
           <div className="flex items-center gap-2">
             <span className="font-extrabold tracking-tight text-white text-base">Attendora</span>
             <span className="hidden sm:inline-block text-[10px] text-slate-400 border border-slate-700 px-2 py-0.5 rounded-full font-mono">
-              v1.0.0 PRD Master
+              v1.5.0 RLS Ready
             </span>
+            <div className="hidden lg:flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono border border-slate-700/80 bg-slate-800/60">
+              <span className={`w-1.5 h-1.5 rounded-full ${isBackendConnected ? 'bg-emerald-400 animate-pulse' : 'bg-blue-400'}`}></span>
+              <span className="text-slate-300">{isBackendConnected ? 'API Online (RLS Active)' : 'Local Engine (RLS Context)'}</span>
+            </div>
           </div>
         </div>
 
@@ -249,6 +323,33 @@ export default function App() {
 
         {/* Operational Quick Actions */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsAiRetentionOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-950/80 text-purple-200 hover:text-white border border-purple-700/80 transition"
+            title="Gemini 2.5 AI Student Dropout & Failure Predictor"
+          >
+            <Brain className="w-3.5 h-3.5 text-purple-400" />
+            <span className="hidden xl:inline">AI Retention</span>
+          </button>
+
+          <button
+            onClick={() => setIsStudentScannerOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 transition"
+            title="Scan classroom rolling QR code"
+          >
+            <QrCode className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="hidden md:inline">Scan QR</span>
+          </button>
+
+          <button
+            onClick={() => setIsDynamicQrOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 transition"
+            title="Launch classroom projector dynamic QR display"
+          >
+            <QrCode className="w-3.5 h-3.5 text-teal-400" />
+            <span className="hidden lg:inline">Projector QR</span>
+          </button>
+
           <button
             onClick={() => setIsRollCallOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 hover:brightness-110 transition shadow-xs"
