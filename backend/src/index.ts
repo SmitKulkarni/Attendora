@@ -6,8 +6,8 @@ import {
   INITIAL_COURSES,
   INITIAL_SESSIONS,
   INITIAL_AUDIT_LOGS,
-} from '../data/mockData.ts';
-import { StudentRecord, AttendanceSession, AuditLogEntry } from '../types/index.ts';
+} from './data/mockData.ts';
+import { StudentRecord, AttendanceSession, AuditLogEntry } from './types/index.ts';
 
 dotenv.config();
 
@@ -448,6 +448,16 @@ app.post('/api/v1/audit/logs', (req: AuthenticatedRequest, res: Response) => {
 
   auditLogs.unshift(log);
   res.status(201).json({ success: true, log });
+});
+
+// Centralized Error Handling Middleware
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  if (err instanceof SyntaxError && 'status' in err && (err as any).status === 400) {
+    res.status(400).json({ error: { code: 'INVALID_JSON', message: 'Malformed JSON payload' } });
+    return;
+  }
+  console.error('[Attendora API Error]:', err);
+  res.status(500).json({ error: { code: 'INTERNAL_SERVER_ERROR', message: 'Internal server error' } });
 });
 
 if (process.env.NODE_ENV !== 'test') {

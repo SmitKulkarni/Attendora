@@ -17,14 +17,15 @@ class ApiClient {
   private isOnlineBackendAvailable: boolean | null = null;
 
   constructor() {
-    // Default to relative /api/v1 or standard local server port 5000
-    this.baseUrl = typeof window !== 'undefined' && window.location.port === '3000'
+    // Read from Vite environment variable or fall back dynamically
+    const envApiUrl = typeof import.meta !== 'undefined' && import.meta.env ? (import.meta.env.VITE_API_URL as string) : undefined;
+    this.baseUrl = envApiUrl || (typeof window !== 'undefined' && window.location.port === '3000'
       ? 'http://localhost:5000/api/v1'
-      : '/api/v1';
+      : '/api/v1');
 
     if (typeof window !== 'undefined') {
       this.token = localStorage.getItem('attendora_access_token');
-      const savedTenant = localStorage.getItem('attendora_tenant_id');
+      const savedTenant = localStorage.getItem('attendora_tenant_id') || (typeof import.meta !== 'undefined' && import.meta.env ? (import.meta.env.VITE_DEFAULT_TENANT_ID as string) : null);
       if (savedTenant) this.tenantId = savedTenant;
     }
   }

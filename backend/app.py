@@ -1,4 +1,11 @@
 import os
+import sys
+
+# Ensure project root is in sys.path whether executed directly or as a package
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
+
 from flask import Flask, jsonify, request, g
 from backend.config import Config
 from backend.routes.auth_routes import auth_bp

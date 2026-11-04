@@ -28,9 +28,20 @@ This document serves as the persistent memory, architectural blueprint, and doma
 
 ---
 
-## 2. Tech Stack
+## 2. Repository Architecture & Tech Stack
 
-### 2.1 Web & Presentation Tier (Active Codebase)
+### 2.1 Decoupled Monorepo Structure
+```text
+Attendora/
+├── frontend/                     # React 19 Client Application (Vite, Tailwind v4, Lucide)
+├── backend/                      # Python Flask Monolith + Express TypeScript Companion
+├── tests/                        # Backend statutory compliance and RLS test suites
+├── package.json                  # Root monorepo workspace orchestration
+├── README.md                     # Comprehensive setup and API guide
+└── decisions.md, rules.md, memory.md, phases.md, changelog.md
+```
+
+### 2.2 Web & Presentation Tier (`frontend/`)
 | Layer | Technology | Version | Purpose |
 | :--- | :--- | :--- | :--- |
 | **Framework** | React | `^19.0.1` | Declarative UI component tree |
@@ -39,19 +50,17 @@ This document serves as the persistent memory, architectural blueprint, and doma
 | **Bundler / Dev** | Vite | `^8.3.0` | Ultra-fast HMR and build pipeline |
 | **Motion** | Motion (Framer) | `^12.23.24` | Gestures, swipe physics, modal transitions |
 | **Icons** | Lucide React | `^0.546.0` | Clean enterprise icon system |
-| **AI Integration** | `@google/genai` | `^2.4.0` | Gemini 2.5 server-side compliance insights |
-| **Server Runtime** | Node.js | `v24.15.0` | Local build, testing, and dev host |
+| **API Client** | Native Fetch | ES2022 | REST client with Bearer JWT and `X-Tenant-ID` injection |
 
-### 2.2 Target Backend & Persistence Tier (PRD Specification)
+### 2.3 Backend & Persistence Tier (`backend/`)
 | Layer | Technology | Specification | Purpose |
 | :--- | :--- | :--- | :--- |
-| **Backend Framework** | Python Flask | `3.0+` / Gunicorn | Modular Monolith REST API |
-| **Primary Database** | PostgreSQL | `16+` | Relational ACID storage with Row-Level Security (RLS) |
-| **Partitioning** | PostgreSQL Partitioning | Range (`session_date`) | Sub-second queries on high-volume attendance records |
-| **In-Memory Bus** | Redis | `7.2+` | Rate limiting, token deny-list, task queuing |
-| **Task Worker** | RQ / Celery | Latest | Background CSV parsing, PDF generation, emails |
-| **Password Hashing** | Argon2id | Industry Standard | High-entropy credential protection |
-| **Auth Tokens** | JWT | Short-lived (15 min) | Scoped tenant and role access claims |
+| **Monolith API** | Python Flask | `3.0+` / Gunicorn | Domain blueprints (`auth`, `academic`, `attendance`, `audit`) |
+| **Companion API** | Express / Node | `4.21+` / TypeScript | Zero-config companion for lightweight local dev |
+| **Primary Database**| PostgreSQL / Supabase | `16+` / Cloud | Multi-tenant schema with kernel Row-Level Security (RLS) |
+| **Cloud Adapter** | Supabase JS | `^2.49+` | Live cloud database sync with offline REST fallback |
+| **Partitioning** | Range Partitioning | `session_date` | High-volume monthly partitions on `attendance_records` |
+| **Auth Tokens** | JWT | HMAC-SHA256 / HS256 | Scoped tenant, role, and expiration claims |
 
 ---
 

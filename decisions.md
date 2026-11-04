@@ -250,3 +250,64 @@ Implement strict **Session Locking & Immutable Append-Only Audit Logging**:
 - Audit Log Inspection UI implemented in `src/components/desktop/AuditLogModal.tsx`.
 - Automated log emission integrated into `App.tsx` state handlers.
 
+
+---
+
+## ADR-008: Physical Decoupling into Independent Frontend and Backend Subfolders
+
+### Date
+2026-11-04
+
+### Context / Problem
+Previously, frontend React components and backend server code shared the root project directory and a monolithic `package.json`. While convenient for early prototyping, this coupled build tooling, mixed frontend client code with server runtime dependencies, caused configuration friction between Node/Vite environments, and complicated production deployment pipelines.
+
+### Decision Taken
+Completely decouple the codebase into two independent subfolders:
+1. `frontend/`:
+   - Contains React 19 UI, Vite bundler configuration, static assets (`public/`), styling (`index.css`), API client layer (`src/api/client.ts`), and dedicated `frontend/package.json`.
+   - Communicates with the backend exclusively via standard HTTP/REST fetch calls.
+   - Manages its own `.env` file (`VITE_API_URL`, `VITE_APP_TITLE`, etc.).
+2. `backend/`:
+   - Contains Python Flask modular monolith engine (`app.py`, `routes/`), PostgreSQL schema migrations (`migrations/`), Express TypeScript companion server (`src/index.ts`), and dedicated `backend/package.json` + `requirements.txt`.
+   - Manages its own `.env` file (`PORT`, `JWT_SECRET`, `DATABASE_URL`, `FRONTEND_URL`, etc.).
+3. Project Root:
+   - Contains monorepo orchestration scripts in root `package.json` (`npm run dev:frontend`, `npm run dev:backend`, `npm test`), shared documentation, and `.gitignore`.
+
+### Reasoning
+- **Deployment Flexibility:** Frontend can deploy directly to CDNs / static hosts (Vercel, Netlify, Cloudflare Pages) while backend can deploy as a Docker container to Google Cloud Run, AWS ECS, or Render.
+- **Dependency Isolation:** Browser bundle avoids importing Node-specific packages (`express`, `dotenv`), and backend avoids UI dependencies (`lucide-react`, `motion`).
+- **Security:** Frontend cannot accidentally access server-side secrets or bypass API gateways.
+
+### Alternatives Considered
+1. **Single Monolithic Directory:** Rejected due to dependency pollution and complex deployment boundaries.
+2. **Multi-Repo Split:** Rejected at this phase to preserve atomic commits, shared architectural documentation, and unified end-to-end verification.
+
+### Impact on Project
+- Clear mental model and zero cross-folder direct imports.
+- Frontend test suite (`26 tests`) and backend test suite (`15 tests`) execute independently or unified via root `npm test`.
+
+---
+
+## ADR-009: Supabase Cloud Database Integration & Role-Partitioned Authentication Gate
+
+### Date
+2026-11-05
+
+### Context / Problem
+Users required cloud PostgreSQL persistence via Supabase along with an unauthenticated-first security gate, distinct login flows for academic staff vs. students, and comprehensive administrative update privileges for staff (roster manipulation, manual percentage overrides, session conducting, and audit recording).
+
+### Decision Taken
+1. **Supabase Cloud Layer (`frontend/src/api/supabaseClient.ts` & `backend/migrations/supabase_complete_schema.sql`):**
+   - Implemented `@supabase/supabase-js` client layer supporting live queries against Supabase tables (`students`, `courses`, `attendance_sessions`, `audit_logs`).
+   - Provided an executable migration script with Row-Level Security policies granting public read access and Staff write access.
+   - Built seamless dual-mode fallback: if Supabase environment keys (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) are not configured, the platform falls back to the local REST API (`http://localhost:5000/api/v1`) or mock seed data without disruption.
+2. **First-Screen Authentication Gate (`LoginPage.tsx`):**
+   - The application mounts the Institutional Sign In page first upon opening `http://localhost:3000/`.
+   - Distinct, animated tab switcher separating **Staff & Faculty** (Professors, Deans) from **Student Portal** (Roll number / PRN access).
+   - Fast 1-click evaluation profiles for both personas.
+3. **Staff Full Authority Mode:**
+   - Staff credentials unlock the full Desktop Governance Console with capabilities to conduct roll-call, edit student percentages with mandatory written audit reasons, directly provision new students, import bulk CSV rosters, approve medical exam waivers, and run statutory defaulter exports.
+
+### Impact on Project
+- Secure, production-ready entry flow matching institutional higher education requirements.
+- Flexible deployment targeting either local Docker PostgreSQL or Supabase Cloud.

@@ -7,6 +7,7 @@ import {
   Sparkles,
   CheckCircle2,
   AlertTriangle,
+  LogOut,
 } from 'lucide-react';
 import {
   UserProfile,
@@ -35,8 +36,10 @@ interface DesktopDashboardProps {
   auditLogs: AuditLogEntry[];
   notifications: AppNotification[];
   onUpdateStudent: (updated: StudentRecord) => void;
+  onAddStudent?: (newStudent: StudentRecord) => void;
   onAddSession: (session: AttendanceSession) => void;
   onImportStudents: (newStudents: StudentRecord[]) => void;
+  onSignOut?: () => void;
 }
 
 export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
@@ -49,8 +52,10 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
   auditLogs,
   notifications,
   onUpdateStudent,
+  onAddStudent,
   onAddSession,
   onImportStudents,
+  onSignOut,
 }) => {
   const [filterMode, setFilterMode] = useState<string>('all');
   const [isRollCallOpen, setIsRollCallOpen] = useState<boolean>(false);
@@ -177,6 +182,16 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
                     </div>
                   </button>
                 ))}
+
+                {onSignOut && (
+                  <button
+                    onClick={onSignOut}
+                    className="w-full mt-2 pt-2 border-t border-slate-100 flex items-center gap-2 px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-lg text-xs font-semibold transition"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Sign Out to Login Portal</span>
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -215,6 +230,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
         <StudentRosterTable
           students={students}
           onUpdateStudent={onUpdateStudent}
+          onAddStudent={onAddStudent || ((s) => onImportStudents([s]))}
           openRollCall={() => setIsRollCallOpen(true)}
           openCsvImport={() => setIsCsvImportOpen(true)}
         />

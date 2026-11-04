@@ -35,6 +35,15 @@ interface ShowcaseViewProps {
   onImportStudents: (newStudents: StudentRecord[]) => void;
   onSelectDesktopFull: () => void;
   onSelectMobileFull: () => void;
+  openRollCall?: () => void;
+  openDefaulters?: () => void;
+  openAuditLog?: () => void;
+  openDynamicQr?: () => void;
+  openNotifications?: () => void;
+  openHardware?: () => void;
+  openAiRetention?: () => void;
+  openHallTicket?: () => void;
+  openAccreditation?: () => void;
 }
 
 export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
@@ -51,6 +60,15 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
   onImportStudents,
   onSelectDesktopFull,
   onSelectMobileFull,
+  openRollCall,
+  openDefaulters,
+  openAuditLog,
+  openDynamicQr,
+  openNotifications,
+  openHardware,
+  openAiRetention,
+  openHallTicket,
+  openAccreditation,
 }) => {
   const [activeSidebarTab, setActiveSidebarTab] = React.useState<string>('dashboard');
 
@@ -123,15 +141,15 @@ export const ShowcaseView: React.FC<ShowcaseViewProps> = ({
             <Sidebar
               activeTab={activeSidebarTab}
               onSelectTab={setActiveSidebarTab}
-              openRollCall={() => {
-                const btn = document.querySelector('[aria-label="New Session"]') as HTMLButtonElement;
-                if (btn) btn.click();
-              }}
-              openDefaulters={() => {
-                const optBtn = document.querySelector('button[title="Import student roster via CSV"]') as HTMLButtonElement;
-                if (optBtn) optBtn.click();
-              }}
-              openAuditLog={() => {}}
+              openRollCall={openRollCall || (() => {})}
+              openDefaulters={openDefaulters || (() => {})}
+              openAuditLog={openAuditLog || (() => {})}
+              openDynamicQr={openDynamicQr}
+              openNotifications={openNotifications}
+              openHardware={openHardware}
+              openAiRetention={openAiRetention}
+              openHallTicket={openHallTicket}
+              openAccreditation={openAccreditation}
             />
 
             <DesktopDashboard

@@ -18,6 +18,7 @@ import { StudentRecord } from '../../types/index.ts';
 interface StudentRosterTableProps {
   students: StudentRecord[];
   onUpdateStudent: (updated: StudentRecord) => void;
+  onAddStudent?: (newStudent: StudentRecord) => void;
   openRollCall: () => void;
   openCsvImport: () => void;
 }
@@ -25,6 +26,7 @@ interface StudentRosterTableProps {
 export const StudentRosterTable: React.FC<StudentRosterTableProps> = ({
   students,
   onUpdateStudent,
+  onAddStudent,
   openRollCall,
   openCsvImport,
 }) => {
@@ -36,6 +38,16 @@ export const StudentRosterTable: React.FC<StudentRosterTableProps> = ({
   const [editingStudent, setEditingStudent] = useState<StudentRecord | null>(null);
   const [editRateValue, setEditRateValue] = useState<number>(0);
   const [editNotes, setEditNotes] = useState<string>('');
+  const [editName, setEditName] = useState<string>('');
+  const [editRollNo, setEditRollNo] = useState<string>('');
+
+  // Add Student State
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newRollNo, setNewRollNo] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [newDepartment, setNewDepartment] = useState('Computer Science & Engineering');
+  const [newRate, setNewRate] = useState(85);
 
   // Filtering & Sorting
   const filteredStudents = useMemo(() => {
@@ -91,6 +103,8 @@ export const StudentRosterTable: React.FC<StudentRosterTableProps> = ({
     setEditingStudent(student);
     setEditRateValue(student.attendanceRate);
     setEditNotes(student.notes || '');
+    setEditName(student.name);
+    setEditRollNo(student.rollNo);
   };
 
   const saveStudentEdit = () => {
@@ -99,6 +113,8 @@ export const StudentRosterTable: React.FC<StudentRosterTableProps> = ({
     const newStatus = newRate >= 75.0 ? 'Present' : 'Low Rate';
     const updated: StudentRecord = {
       ...editingStudent,
+      name: editName.trim() || editingStudent.name,
+      rollNo: editRollNo.trim() || editingStudent.rollNo,
       attendanceRate: newRate,
       status: newStatus,
       totalAttended: Math.round((newRate / 100) * editingStudent.totalConducted),
@@ -106,6 +122,36 @@ export const StudentRosterTable: React.FC<StudentRosterTableProps> = ({
     };
     onUpdateStudent(updated);
     setEditingStudent(null);
+  };
+
+  const handleAddSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newName.trim() || !newRollNo.trim()) return;
+    const newStudent: StudentRecord = {
+      id: `stu-${Date.now()}`,
+      rollNo: newRollNo.trim(),
+      name: newName.trim(),
+      email: newEmail.trim() || `${newRollNo.trim()}@student.attendora.edu`,
+      department: newDepartment,
+      semester: 6,
+      section: 'A',
+      avatar: `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150`,
+      totalConducted: 40,
+      totalAttended: Math.round((newRate / 100) * 40),
+      attendanceRate: newRate,
+      status: newRate >= 75.0 ? 'Present' : 'Low Rate',
+      notes: 'Directly provisioned by staff under Full Authority',
+    };
+    if (onAddStudent) {
+      onAddStudent(newStudent);
+    } else {
+      onUpdateStudent(newStudent);
+    }
+    setIsAddModalOpen(false);
+    setNewName('');
+    setNewRollNo('');
+    setNewEmail('');
+    setNewRate(85);
   };
 
   const handleBulkMark = (newStatus: 'Present' | 'Low Rate') => {
@@ -447,6 +493,108 @@ export const StudentRosterTable: React.FC<StudentRosterTableProps> = ({
                 Commit & Log Audit
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Student Modal (Staff Full Access) */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95">
+            <h4 className="text-base font-bold text-slate-900 mb-1 flex items-center gap-2">
+              <Plus className="w-4 h-4 text-emerald-600" />
+              <span>Enroll New Student (Staff Authority)</span>
+            </h4>
+            <p className="text-xs text-slate-500 mb-4">
+              Directly add an enrolled student record to the academic ledger and database.
+            </p>
+
+            <form onSubmit={handleAddSubmit} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Full Student Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="e.g. Rahul Sharma"
+                  className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:outline-hidden"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    PRN / Roll Number
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newRollNo}
+                    onChange={(e) => setNewRollNo(e.target.value)}
+                    placeholder="e.g. 20000006"
+                    className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:outline-hidden"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Initial Attendance (%)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={newRate}
+                    onChange={(e) => setNewRate(Number(e.target.value))}
+                    className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:outline-hidden"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Student Email
+                </label>
+                <input
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder="e.g. rahul.sharma@student.attendora.edu"
+                  className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:outline-hidden"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Academic Department
+                </label>
+                <input
+                  type="text"
+                  value={newDepartment}
+                  onChange={(e) => setNewDepartment(e.target.value)}
+                  className="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:outline-hidden"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-xs font-bold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition shadow-xs"
+                >
+                  Create Student Record
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

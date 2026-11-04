@@ -58,16 +58,49 @@ import {
   updateStudentRate,
   bulkImportStudents,
 } from './api/index.ts';
+import { LoginPage } from './components/auth/LoginPage.tsx';
+import {
+  isSupabaseConfigured,
+  getSupabaseStudents,
+  updateSupabaseStudent,
+  insertSupabaseStudent,
+  logSupabaseAudit,
+} from './api/supabaseClient.ts';
+import { LogOut } from 'lucide-react';
 
 export default function App() {
   // Navigation / View state
-  const [viewMode, setViewMode] = useState<'SHOWCASE' | 'DESKTOP' | 'MOBILE'>('SHOWCASE');
-  const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USERS[1]); // Default to Faculty/Admin
+  const [viewMode, setViewMode] = useState<'SHOWCASE' | 'DESKTOP' | 'MOBILE'>('DESKTOP');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('attendora_is_authenticated') === 'true';
+    }
+    return false;
+  });
+  const [currentUser, setCurrentUser] = useState<UserProfile>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('attendora_current_user');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {}
+      }
+    }
+    return INITIAL_USERS[0]; // Default: Dr. Anita Roy (Staff/Admin)
+  });
   const [activeSidebarTab, setActiveSidebarTab] = useState<string>('dashboard');
   const [isBackendConnected, setIsBackendConnected] = useState<boolean | null>(null);
 
-  // Hydrate live state if backend is online
+  // Hydrate live state if Supabase or backend API is online
   React.useEffect(() => {
+    if (isSupabaseConfigured) {
+      getSupabaseStudents().then((supaStudents) => {
+        if (supaStudents && supaStudents.length > 0) {
+          setStudents(supaStudents);
+        }
+      });
+    }
+
     apiClient.checkBackendHealth().then((online) => {
       setIsBackendConnected(online);
       if (online) {
@@ -127,6 +160,52 @@ export default function App() {
   });
 
 
+  // Authentication Handlers
+  const handleLoginSuccess = (user: UserProfile) => {
+    setCurrentUser(user);
+    setIsAuthenticated(true);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('attendora_is_authenticated', 'true');
+      localStorage.setItem('attendora_current_user', JSON.stringify(user));
+    }
+    if (user.role === 'STUDENT') {
+      setViewMode('MOBILE');
+    } else {
+      setViewMode('DESKTOP');
+    }
+  };
+
+  const handleSignOut = () => {
+    setIsAuthenticated(false);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('attendora_is_authenticated');
+      localStorage.removeItem('attendora_current_user');
+      localStorage.removeItem('attendora_access_token');
+    }
+  };
+
+  const handleAddStudent = (newStudent: StudentRecord) => {
+    setStudents((prev) => [newStudent, ...prev]);
+
+    const newLog: AuditLogEntry = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      actorId: currentUser.id,
+      actorName: currentUser.name,
+      role: currentUser.role,
+      action: 'STUDENT_ENROLLMENT',
+      targetSessionId: newStudent.id,
+      studentName: `${newStudent.name} (${newStudent.rollNo})`,
+      previousStatus: 'Unenrolled',
+      newStatus: 'Active Enrolled',
+      reason: 'Direct administrative provision by staff (Full Access)',
+    };
+    setAuditLogs((prev) => [newLog, ...prev]);
+
+    insertSupabaseStudent(newStudent).catch(() => {});
+    logSupabaseAudit(newLog).catch(() => {});
+  };
+
   // Handlers for mutations
   const handleUpdateStudent = (updatedStudent: StudentRecord) => {
     setStudents((prev) =>
@@ -148,6 +227,14 @@ export default function App() {
       reason: updatedStudent.notes || 'Direct administrative percentage update',
     };
     setAuditLogs((prev) => [newLog, ...prev]);
+
+    // Dispatch to Supabase Cloud if configured
+    updateSupabaseStudent(
+      updatedStudent.id,
+      updatedStudent.attendanceRate,
+      updatedStudent.notes || 'Direct faculty attendance override'
+    ).catch(() => {});
+    logSupabaseAudit(newLog).catch(() => {});
 
     // Dispatch to backend API asynchronously
     updateStudentRate(
@@ -259,6 +346,16 @@ export default function App() {
     setAuditLogs(INITIAL_AUDIT_LOGS);
     setNotifications(INITIAL_NOTIFICATIONS);
   };
+
+  // Gate application behind Institutional Login Screen
+  if (!isAuthenticated) {
+    return (
+      <LoginPage
+        onLoginSuccess={handleLoginSuccess}
+        isBackendConnected={isBackendConnected}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col antialiased text-[#0B1C30]">
@@ -383,6 +480,32 @@ export default function App() {
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
+
+          {/* Current Authenticated User & Sign Out */}
+          <div className="flex items-center gap-2 pl-2 border-l border-slate-700">
+            <img
+              src={currentUser.avatar}
+              alt={currentUser.name}
+              className="w-7 h-7 rounded-full object-cover border border-slate-500"
+            />
+            <div className="hidden xl:block text-left">
+              <div className="text-[11px] font-bold text-white leading-tight">
+                {currentUser.name}
+              </div>
+              <div className="text-[9px] text-emerald-400 font-semibold leading-tight">
+                {currentUser.role === 'STUDENT' ? 'Student Portal' : 'Staff (Full Authority)'}
+              </div>
+            </div>
+
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-red-950/60 text-red-300 hover:bg-red-900 border border-red-700/60 transition ml-1"
+              title="Sign Out to Login Portal"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden md:inline">Sign Out</span>
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -403,6 +526,15 @@ export default function App() {
             onImportStudents={handleImportStudents}
             onSelectDesktopFull={() => setViewMode('DESKTOP')}
             onSelectMobileFull={() => setViewMode('MOBILE')}
+            openRollCall={() => setIsRollCallOpen(true)}
+            openDefaulters={() => setIsDefaultersOpen(true)}
+            openAuditLog={() => setIsAuditLogOpen(true)}
+            openDynamicQr={() => setIsDynamicQrOpen(true)}
+            openNotifications={() => setIsNotificationDispatchOpen(true)}
+            openHardware={() => setIsHardwareOpen(true)}
+            openAiRetention={() => setIsAiRetentionOpen(true)}
+            openHallTicket={() => setIsHallTicketOpen(true)}
+            openAccreditation={() => setIsAccreditationOpen(true)}
           />
         )}
 
@@ -414,6 +546,12 @@ export default function App() {
               openRollCall={() => setIsRollCallOpen(true)}
               openDefaulters={() => setIsDefaultersOpen(true)}
               openAuditLog={() => setIsAuditLogOpen(true)}
+              openDynamicQr={() => setIsDynamicQrOpen(true)}
+              openNotifications={() => setIsNotificationDispatchOpen(true)}
+              openHardware={() => setIsHardwareOpen(true)}
+              openAiRetention={() => setIsAiRetentionOpen(true)}
+              openHallTicket={() => setIsHallTicketOpen(true)}
+              openAccreditation={() => setIsAccreditationOpen(true)}
             />
             <DesktopDashboard
               currentUser={currentUser}
@@ -425,8 +563,10 @@ export default function App() {
               auditLogs={auditLogs}
               notifications={notifications}
               onUpdateStudent={handleUpdateStudent}
+              onAddStudent={handleAddStudent}
               onAddSession={handleAddSession}
               onImportStudents={handleImportStudents}
+              onSignOut={handleSignOut}
             />
           </div>
         )}
@@ -439,6 +579,7 @@ export default function App() {
                 overallAttendance={82}
                 notifications={notifications}
                 studentName={currentUser.role === 'STUDENT' ? currentUser.name : 'Sneha Kulkarni'}
+                onSignOut={handleSignOut}
               />
             </div>
           </div>
@@ -470,6 +611,47 @@ export default function App() {
         isOpen={isAuditLogOpen}
         onClose={() => setIsAuditLogOpen(false)}
         auditLogs={auditLogs}
+      />
+
+      <DynamicQrDisplayModal
+        isOpen={isDynamicQrOpen}
+        onClose={() => setIsDynamicQrOpen(false)}
+      />
+
+      <NotificationDispatchModal
+        isOpen={isNotificationDispatchOpen}
+        onClose={() => setIsNotificationDispatchOpen(false)}
+        students={students}
+      />
+
+      <HardwareIntegrationModal
+        isOpen={isHardwareOpen}
+        onClose={() => setIsHardwareOpen(false)}
+      />
+
+      <StudentQrScannerModal
+        isOpen={isStudentScannerOpen}
+        onClose={() => setIsStudentScannerOpen(false)}
+      />
+
+      <AiRetentionModal
+        isOpen={isAiRetentionOpen}
+        onClose={() => setIsAiRetentionOpen(false)}
+        students={students}
+        courses={courses}
+      />
+
+      <HallTicketGatingModal
+        isOpen={isHallTicketOpen}
+        onClose={() => setIsHallTicketOpen(false)}
+        students={students}
+      />
+
+      <AccreditationExportModal
+        isOpen={isAccreditationOpen}
+        onClose={() => setIsAccreditationOpen(false)}
+        students={students}
+        courses={courses}
       />
 
       {/* Verified Deep Link Report View Modal */}

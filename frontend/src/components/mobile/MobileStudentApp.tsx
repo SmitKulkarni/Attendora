@@ -12,6 +12,7 @@ import {
   ChevronRight,
   CheckCircle2,
   Clock,
+  LogOut,
   ArrowRight,
   Calendar,
   Share2,
@@ -35,6 +36,7 @@ interface MobileStudentAppProps {
   notifications: AppNotification[];
   studentName?: string;
   onOpenCalculator?: () => void;
+  onSignOut?: () => void;
 }
 
 export const MobileStudentApp: React.FC<MobileStudentAppProps> = ({
@@ -42,6 +44,7 @@ export const MobileStudentApp: React.FC<MobileStudentAppProps> = ({
   overallAttendance = 82,
   notifications,
   studentName = 'Sneha Kulkarni',
+  onSignOut,
 }) => {
   const [activeTab, setActiveTab] = useState<'home' | 'courses' | 'calc' | 'profile'>('home');
   const [showAlert, setShowAlert] = useState<boolean>(true);
@@ -238,17 +241,30 @@ export const MobileStudentApp: React.FC<MobileStudentAppProps> = ({
           <span className="font-bold text-lg tracking-tight text-white">Attendora</span>
         </div>
 
-        {/* Notification Bell matching screenshot with badge "3" */}
-        <button
-          onClick={() => setShowNotificationsModal(true)}
-          className="relative p-2 text-slate-300 hover:text-white rounded-full transition"
-          aria-label="Notifications"
-        >
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
-            3
-          </span>
-        </button>
+        <div className="flex items-center gap-1">
+          {/* Notification Bell matching screenshot with badge "3" */}
+          <button
+            onClick={() => setShowNotificationsModal(true)}
+            className="relative p-2 text-slate-300 hover:text-white rounded-full transition"
+            aria-label="Notifications"
+          >
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+              3
+            </span>
+          </button>
+
+          {onSignOut && (
+            <button
+              onClick={onSignOut}
+              className="p-2 text-slate-400 hover:text-red-400 rounded-full transition"
+              title="Sign Out to Login Portal"
+              aria-label="Sign Out"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Main Scrollable View */}

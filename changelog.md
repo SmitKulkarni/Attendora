@@ -47,6 +47,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.0] - 2026-11-05
+
+### Added
+- **Supabase Cloud Database Layer:**
+  - Installed `@supabase/supabase-js` across frontend and backend.
+  - Created `frontend/src/api/supabaseClient.ts` with auto-hydration, live queries, RLS student insertion, rate updates, and audit logging.
+  - Added copy-paste ready Supabase SQL migration script in `backend/migrations/supabase_complete_schema.sql` with full RLS policies and seed datasets.
+- **First-Screen Institutional Login Portal (`LoginPage.tsx`):**
+  - Gated application behind an institutional login screen that displays first when the application URL is opened.
+  - Distinct role-partitioned tabs: **Staff & Faculty** (Professors, Deans) vs **Student Portal** (Roll No / PRN access).
+  - Quick 1-click evaluation demo profiles for instant role switching (`Dr. Anita Roy`, `Prof. Rajesh Deshmukh`, `Sneha Kulkarni`).
+- **Staff Full Update Access:**
+  - Added "+ Add Student" modal in `StudentRosterTable.tsx` allowing staff to directly provision enrolled students into the database.
+  - Unlocked student record editing (name, rollNo, attendance percentage with written justification) and live session roll-call conducting.
+  - Added universal "Sign Out" actions to return to the login screen.
+
+## [1.5.0] - 2026-11-04
+
+### Changed
+- **Separated Monorepo Subfolders (`frontend/` & `backend/`):**
+  - Moved all client-side code into `frontend/` (`frontend/src/`, `frontend/public/`, `frontend/index.html`, `frontend/vite.config.ts`, `frontend/package.json`).
+  - Moved all backend code into `backend/` (`backend/src/` for Express companion, `backend/routes/` and `backend/app.py` for Python Flask monolith, `backend/migrations/` for SQL schemas, `backend/package.json`, `backend/requirements.txt`).
+  - Isolated dependencies: `frontend/package.json` contains React, Vite, Tailwind CSS, Lucide, and Motion; `backend/package.json` contains Express and Dotenv.
+  - Separated environment variable files: `frontend/.env` (prefixed with `VITE_`) and `backend/.env` (backend secrets and database credentials).
+  - Configured root `package.json` with multi-project scripts (`npm run dev:frontend`, `npm run dev:backend`, `npm run test:frontend`, `npm run test:backend`).
+  - Created root `README.md` with complete installation, execution, and architectural documentation.
+  - All 41 automated tests (26 frontend unit tests + 15 backend tests) pass with 100% success rate.
+### Fixed
+- **Modal Rendering & Sidebar Wiring in `App.tsx` & `ShowcaseView.tsx`:**
+  - Resolved issue where 7 enterprise modals (`DynamicQrDisplayModal`, `NotificationDispatchModal`, `HardwareIntegrationModal`, `StudentQrScannerModal`, `AiRetentionModal`, `HallTicketGatingModal`, `AccreditationExportModal`) were imported and state-managed, but omitted from the JSX render tree.
+  - Connected modal callbacks (`openDynamicQr`, `openNotifications`, `openHardware`, `openAiRetention`, `openHallTicket`, `openAccreditation`) from `App.tsx` into both Desktop and Showcase `Sidebar` instances.
+- **Backend Error Handling:**
+  - Added centralized Express error handling middleware in `backend/src/index.ts` to trap malformed JSON payloads and unexpected server errors gracefully.
+- **Import Validation:**
+  - Audited all 50 TypeScript/JavaScript files across `frontend/` and `backend/`; verified zero broken imports or invalid relative paths.
+
 ## [1.0.0] - 2026-11-04
 
 ### Added
